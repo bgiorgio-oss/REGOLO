@@ -1,0 +1,116 @@
+{
+  "_descrizione": "Report di compilazione del regolamento SAM2026 — output simulato del Compilatore L1 (nel sistema reale: LLM + retrieval su KB gare passate + structured output). Mostra il lavoro clausola per clausola, la confidenza e le escalation a verifica umana.",
+  "documento_fonte": "REGOLAMENTO_SPAZIO_ALLA_META_2026.md",
+  "revisione_fonte": "originale 2026-03-20",
+  "compilatore": "REGOLO Compiler v0 (mock)",
+  "data_compilazione": "2026-03-24",
+  "esito": "APPROVATO",
+  "approvato_da": "b.giorgio (responsabile gara)",
+  "approvato_il": "2026-03-27",
+  "statistiche": {
+    "clausole_analizzate": 14,
+    "interpretate_automaticamente": 12,
+    "escalation_verifica_umana": 2,
+    "pattern_riconosciuti_da_kb": ["punti_per_unita", "cap_mensile", "bonus_obiettivo_cluster", "bonus_paniere", "moltiplicatore_stagionale", "storno_finestra", "classifica_normalizzata"]
+  },
+  "clausole": [
+    {
+      "id": "C01", "articolo": "art. 2",
+      "testo_estratto": "punti vendita Spazio Enel Partner che abbiano formalizzato l'adesione entro il 31/03/2026 e che risultino attivi",
+      "interpretazione": "Destinatari = PV con stato 'attivo' in anagrafica e data adesione <= 2026-03-31",
+      "campo_contratto": "destinatari", "confidenza": 0.97, "stato": "auto"
+    },
+    {
+      "id": "C02", "articolo": "art. 3",
+      "testo_estratto": "dal 1° aprile 2026 al 30 settembre 2026 ... suddiviso in mesi solari",
+      "interpretazione": "Periodo 2026-04-01 / 2026-09-30, granularità di calcolo mensile",
+      "campo_contratto": "meta.valido_dal, meta.valido_al", "confidenza": 0.99, "stato": "auto"
+    },
+    {
+      "id": "C03", "articolo": "art. 4.1",
+      "testo_estratto": "cluster determinati sulla base della media mensile di attivazioni commodity 2025 ... GOLD >= 60 / SILVER 30-59 / BRONZE < 30, obiettivi 80/50/30",
+      "interpretazione": "Tre cluster statici con target mensile su attivazioni commodity nette",
+      "campo_contratto": "cluster", "confidenza": 0.96, "stato": "auto"
+    },
+    {
+      "id": "C04", "articolo": "art. 5.1",
+      "testo_estratto": "Per ogni contratto Luce o Gas residenziale attivato ... 10 punti, fino a un massimo di 600 punti per Mese di Gara",
+      "interpretazione": "Meccanica punti_per_unita: kpi=luce_gas, punti=10, cap mensile 600 punti",
+      "campo_contratto": "meccaniche.punti_commodity", "confidenza": 0.98, "stato": "auto"
+    },
+    {
+      "id": "C05", "articolo": "art. 5.2",
+      "testo_estratto": "Per ogni contratto Fibra attivato ... 20 punti",
+      "interpretazione": "punti_per_unita: kpi=fibra, punti=20, nessun cap",
+      "campo_contratto": "meccaniche.punti_fibra", "confidenza": 0.98, "stato": "auto"
+    },
+    {
+      "id": "C06", "articolo": "art. 5.3",
+      "testo_estratto": "Per ogni impianto fotovoltaico venduto ... 150 punti",
+      "interpretazione": "punti_per_unita: kpi=fotovoltaico, punti=150",
+      "campo_contratto": "meccaniche.punti_fotovoltaico", "confidenza": 0.98, "stato": "auto"
+    },
+    {
+      "id": "C07", "articolo": "art. 5.4",
+      "testo_estratto": "Per ogni wallbox di ricarica venduta ... 60 punti",
+      "interpretazione": "punti_per_unita: kpi=wallbox, punti=60",
+      "campo_contratto": "meccaniche.punti_wallbox", "confidenza": 0.98, "stato": "auto"
+    },
+    {
+      "id": "C08", "articolo": "art. 5.5 + art. 6.3",
+      "testo_estratto": "Per ogni climatizzatore venduto ... 40 punti / nei Mesi di giugno e luglio 2026 i punti sono moltiplicati per 1,5",
+      "interpretazione": "punti_per_unita: kpi=clima, punti=40, moltiplicatore 1.5 nei periodi 2026-06 e 2026-07 (=60 punti/unità)",
+      "campo_contratto": "meccaniche.punti_clima", "confidenza": 0.95, "stato": "auto"
+    },
+    {
+      "id": "C09", "articolo": "art. 5.6",
+      "testo_estratto": "Il massimale si applica ai punti maturati nel Mese a titolo di attivazioni commodity, al lordo di eventuali storni",
+      "interpretazione": "Il cap 600 si applica agli accrediti lordi del mese; gli storni si sottraggono interi, fuori cap",
+      "campo_contratto": "meccaniche.punti_commodity.note_cap", "confidenza": 0.91, "stato": "auto"
+    },
+    {
+      "id": "C10", "articolo": "art. 5.7",
+      "testo_estratto": "In caso di annullamento, recesso o mancata attivazione effettiva del contratto entro 60 giorni, i punti corrispondenti saranno stornati",
+      "interpretazione": "Storno punti pari all'accredito originario. AMBIGUITÀ: il testo non specifica da quale data decorrono i 60 giorni (firma? attivazione? caricamento dati?)",
+      "campo_contratto": "meccaniche.storni",
+      "confidenza": 0.55, "stato": "verificata_umano",
+      "escalation": {
+        "motivo": "Decorrenza della finestra di 60 giorni non specificata nel testo",
+        "risoluzione": "Chiarito con il Promotore: 60 giorni dalla DATA DI ATTIVAZIONE del contratto. Gli storni arrivano già qualificati nel flusso dati mensile.",
+        "fonte_risoluzione": "Email Promotore del 2026-03-25 (agli atti del fascicolo gara)",
+        "verificato_da": "b.giorgio", "verificato_il": "2026-03-25"
+      }
+    },
+    {
+      "id": "C11", "articolo": "art. 6.1",
+      "testo_estratto": "al raggiungimento dell'obiettivo mensile di cluster, calcolato sulle attivazioni commodity al netto degli storni, è riconosciuto un bonus di 200 punti",
+      "interpretazione": "Bonus condizionale 200 punti. AMBIGUITÀ: non è esplicito se il bonus sia una tantum o riconoscibile in OGNI mese in cui l'obiettivo è raggiunto",
+      "campo_contratto": "meccaniche.bonus_obiettivo_mensile",
+      "confidenza": 0.78, "stato": "verificata_umano",
+      "escalation": {
+        "motivo": "Ricorrenza del bonus non esplicita ('obiettivo mensile' suggerisce ricorrenza, ma il testo non la dichiara)",
+        "risoluzione": "Confermato con il Promotore: il bonus è RICORRENTE, riconosciuto per ciascun Mese di Gara in cui l'obiettivo è raggiunto. Liquidato solo a mese concluso e validato.",
+        "fonte_risoluzione": "Verbale call con Promotore del 2026-03-26",
+        "verificato_da": "b.giorgio", "verificato_il": "2026-03-26"
+      }
+    },
+    {
+      "id": "C12", "articolo": "art. 6.2",
+      "testo_estratto": "almeno un fotovoltaico, una wallbox e un climatizzatore nello stesso Mese ... bonus di 100 punti",
+      "interpretazione": "Bonus condizionale 'tripletta': fotovoltaico>=1 AND wallbox>=1 AND clima>=1 nello stesso mese → +100, ricorrente per mese, liquidato a mese concluso (art. 6.4)",
+      "campo_contratto": "meccaniche.bonus_tripletta", "confidenza": 0.93, "stato": "auto"
+    },
+    {
+      "id": "C13", "articolo": "art. 7",
+      "testo_estratto": "classifica per cluster basata sull'indice di performance: punti maturati nei Mesi conclusi rapportati all'obiettivo mensile del cluster moltiplicato per i Mesi conclusi ... 5.000/3.000/1.500 punti",
+      "interpretazione": "indice = punti_totali_mesi_conclusi / (target_mensile_cluster × mesi_conclusi); premi extra ai top 3 per cluster a fine gara",
+      "campo_contratto": "classifica_finale", "confidenza": 0.90, "stato": "auto"
+    },
+    {
+      "id": "C14", "articolo": "art. 8",
+      "testo_estratto": "convertiti in credito spendibile al tasso di 0,25 € per punto ... accreditato con cadenza mensile entro il giorno 10 del mese successivo, previa validazione",
+      "interpretazione": "Valorizzazione 0.25 EUR/punto; accredito mensile con gate di validazione umana (HITL) prima della contabilizzazione",
+      "campo_contratto": "valorizzazione", "confidenza": 0.96, "stato": "auto"
+    }
+  ]
+}

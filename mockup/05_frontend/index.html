@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spazio alla Meta 2026 — il mio punto vendita</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  header.testata { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:18px 0 20px; }
+  .logo-gara { font-size:24px; font-weight:800; letter-spacing:-.02em; }
+  .logo-gara span { background:var(--arcobaleno); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .spacer { flex:1; }
+  .mese-card { flex:1; min-width:150px; border:1px solid var(--bordo); border-radius:12px; padding:12px 14px; }
+  .bk { display:flex; justify-content:space-between; font-size:13.5px; padding:6px 0; border-bottom:1px dashed var(--bordo); }
+  .bk:last-child { border-bottom:none; }
+</style>
+</head>
+<body>
+<div class="barra-brand"></div>
+<div class="contenitore">
+
+  <header class="testata">
+    <div>
+      <div class="logo-gara">SPAZIO ALLA <span>META</span> 2026</div>
+      <div class="muted small" id="sotto-titolo">—</div>
+    </div>
+    <div class="spacer"></div>
+    <span class="chip blu" id="giorni">—</span>
+    <select id="sel-pv" title="Cambia punto vendita (demo)"></select>
+  </header>
+
+  <div class="riga" style="margin-bottom:16px">
+    <div class="card flex1"><div class="kpi-label">Saldo punti</div>
+      <div class="kpi-valore" id="saldo">—</div>
+      <div class="kpi-sub" id="saldo-sub">contabilizzati</div></div>
+    <div class="card flex1"><div class="kpi-label">Credito maturato</div>
+      <div class="kpi-valore" id="credito">—</div>
+      <div class="kpi-sub">spendibile a catalogo</div></div>
+    <div class="card flex1"><div class="kpi-label">In approvazione</div>
+      <div class="kpi-valore" id="in-appr">—</div>
+      <div class="kpi-sub" id="in-appr-sub">mese corrente, in validazione</div></div>
+    <div class="card flex1"><div class="kpi-label">Classifica</div>
+      <div class="kpi-valore" id="posizione">—</div>
+      <div class="kpi-sub" id="posizione-sub">—</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Il mio andamento mensile</h2>
+    <div class="riga" id="mesi"></div>
+  </div>
+
+  <div class="riga">
+    <div class="card flex1" style="min-width:320px">
+      <h2>Da dove arrivano i miei punti</h2>
+      <div id="breakdown"></div>
+    </div>
+    <div class="card flex1" style="min-width:320px">
+      <h2 id="titolo-classifica">Classifica cluster</h2>
+      <table><thead><tr><th>#</th><th>Punto vendita</th><th style="text-align:right">Punti</th><th style="text-align:right">Indice</th></tr></thead>
+      <tbody id="classifica"></tbody></table>
+      <p class="small muted" style="margin-top:8px">Indice = punti / (target mensile × mesi conclusi) — art. 7 del regolamento.
+      Premi finali: 1° +5.000 · 2° +3.000 · 3° +1.500 punti.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Catalogo premi <span class="muted small">(estratto)</span></h2>
+    <div class="griglia-catalogo" id="catalogo"></div>
+  </div>
+
+  <div class="card">
+    <h2>I miei movimenti <span class="muted small">— ogni punto è tracciato</span></h2>
+    <table><thead><tr><th>Data</th><th>Periodo</th><th>Descrizione</th><th style="text-align:right">Punti</th><th>Stato</th></tr></thead>
+    <tbody id="movimenti"></tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>Comunicazioni</h2>
+    <div id="comunicazioni"></div>
+  </div>
+
+  <div class="footer-demo">
+    Mockup progetto <b>REGOLO</b> — dati interamente fittizi · backend headless su API ·
+    <a href="/backoffice">vai al backoffice →</a>
+  </div>
+</div>
+
+<script>
+const MESI_NOMI = {"2026-04":"Aprile","2026-05":"Maggio","2026-06":"Giugno"};
+const MECC_NOMI = {punti_commodity:"Luce & Gas", punti_fibra:"Fibra", punti_fotovoltaico:"Fotovoltaico",
+                   punti_wallbox:"Wallbox", punti_clima:"Clima", bonus_obiettivo_mensile:"Bonus obiettivo",
+                   bonus_tripletta:"Bonus tripletta", storni:"Storni"};
+const fmt = n => n.toLocaleString("it-IT");
+const eur = n => n.toLocaleString("it-IT", {style:"currency", currency:"EUR"});
+const api = async p => (await fetch(p)).json();
+
+async function caricaPV(codice) {
+  const [gara, pv, classifiche, catalogo, comunicazioni] = await Promise.all([
+    api("/api/gara"), api("/api/pv/" + codice), api("/api/classifiche"),
+    api("/api/catalogo"), api("/api/comunicazioni")]);
+
+  document.getElementById("sotto-titolo").textContent =
+    `${pv.insegna} · cluster ${pv.cluster} · gara ${gara.periodo}`;
+  document.getElementById("giorni").textContent = `${gara.giorni_rimanenti} giorni alla fine`;
+  document.getElementById("saldo").textContent = fmt(pv.saldo_contabilizzato);
+  document.getElementById("credito").textContent = eur(pv.valore_eur);
+  document.getElementById("in-appr").textContent = "+" + fmt(pv.saldo_in_approvazione);
+  document.getElementById("posizione").textContent = pv.posizione_classifica + "°";
+  document.getElementById("posizione-sub").textContent =
+    `su ${pv.dimensione_cluster} PV nel cluster ${pv.cluster}`;
+
+  // andamento mensile
+  document.getElementById("mesi").innerHTML = pv.mesi.map(m => {
+    const nome = MESI_NOMI[m.periodo] + (m.parziale ? " · parziale" : "");
+    if (m.quarantena) return `<div class="mese-card"><b>${nome}</b><br>
+      <span class="chip warn">dati in verifica</span>
+      <div class="small muted" style="margin-top:6px">flusso sospeso dal controllo qualità</div></div>`;
+    const pct = Math.min(100, Math.round(100 * m.attivazioni_nette / m.target));
+    const obiettivo = m.parziale ? `<span class="muted small">obiettivo: a fine mese</span>`
+      : (m.attivazioni_nette >= m.target ? `<span class="chip ok">obiettivo ✓ (+200)</span>`
+                                         : `<span class="chip">obiettivo non raggiunto</span>`);
+    return `<div class="mese-card"><b>${nome}</b>
+      <div class="kpi-valore" style="font-size:22px">${fmt(m.punti)} pt</div>
+      <div class="small muted" style="margin:4px 0 6px">${m.attivazioni_nette}/${m.target} attivazioni nette</div>
+      <div class="progress"><div style="width:${pct}%"></div></div>
+      <div style="margin-top:8px">${obiettivo}</div></div>`;
+  }).join("");
+
+  // breakdown
+  const ordine = ["punti_commodity","punti_fibra","punti_fotovoltaico","punti_wallbox",
+                  "punti_clima","bonus_obiettivo_mensile","bonus_tripletta","storni"];
+  document.getElementById("breakdown").innerHTML = ordine
+    .filter(k => pv.breakdown[k] !== undefined)
+    .map(k => { const v = pv.breakdown[k];
+      return `<div class="bk"><span>${MECC_NOMI[k]}</span>
+        <b class="${v < 0 ? "punti-neg" : "punti-pos"}">${v > 0 ? "+" : ""}${fmt(v)}</b></div>`; })
+    .join("");
+
+  // classifica del proprio cluster
+  document.getElementById("titolo-classifica").textContent = `Classifica cluster ${pv.cluster}`;
+  document.getElementById("classifica").innerHTML = classifiche[pv.cluster].map(r =>
+    `<tr class="${r.pv === pv.codice ? "evidenzia" : ""}">
+      <td>${r.posizione <= 3 ? ["🥇","🥈","🥉"][r.posizione-1] : r.posizione}</td>
+      <td>${r.insegna}<div class="small muted">${r.citta}</div></td>
+      <td style="text-align:right">${fmt(r.punti)}</td>
+      <td style="text-align:right">${r.indice.toLocaleString("it-IT")}</td></tr>`).join("");
+
+  // catalogo
+  document.getElementById("catalogo").innerHTML = catalogo.map(p => {
+    const ok = pv.saldo_contabilizzato >= p.punti;
+    return `<div class="premio"><div class="nome">${p.nome}</div>
+      <div class="muted small">${p.categoria}</div>
+      <div style="margin:8px 0 6px"><b>${fmt(p.punti)} pt</b> <span class="muted small">(${eur(p.punti * gara.tasso_eur_per_punto)})</span></div>
+      ${ok ? '<span class="chip ok">disponibile</span>'
+           : `<span class="chip">mancano ${fmt(p.punti - pv.saldo_contabilizzato)} pt</span>`}</div>`;
+  }).join("");
+
+  // movimenti
+  document.getElementById("movimenti").innerHTML = pv.movimenti.map(e =>
+    `<tr><td class="muted">${e.ts.slice(0,10)}</td><td>${MESI_NOMI[e.periodo] || e.periodo}</td>
+      <td>${e.descrizione}<div class="small muted">contratto v${e.contratto_v} · ${e.meccanica}</div></td>
+      <td style="text-align:right" class="${e.punti < 0 ? "punti-neg" : "punti-pos"}">${e.punti > 0 ? "+" : ""}${fmt(e.punti)}</td>
+      <td>${e.stato === "contabilizzato" ? '<span class="chip ok">contabilizzato</span>'
+                                         : '<span class="chip warn">in approvazione</span>'}</td></tr>`).join("");
+
+  // comunicazioni
+  document.getElementById("comunicazioni").innerHTML = comunicazioni.map(c =>
+    `<div class="bk" style="flex-direction:column; align-items:flex-start">
+      <b>${c.titolo} <span class="muted small" style="font-weight:400">· ${c.data}</span></b>
+      <span class="small">${c.testo}</span></div>`).join("");
+}
+
+(async () => {
+  const lista = await api("/api/pv");
+  const sel = document.getElementById("sel-pv");
+  sel.innerHTML = lista.map(p => `<option value="${p.codice}">${p.insegna} (${p.cluster})</option>`).join("");
+  sel.value = "SE-MI-001";
+  sel.onchange = () => caricaPV(sel.value);
+  await caricaPV(sel.value);
+})();
+</script>
+</body>
+</html>

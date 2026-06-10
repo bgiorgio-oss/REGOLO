@@ -1,0 +1,26 @@
+codice_pv,insegna,citta,provincia,regione,cluster,media_2025,email_referente,data_adesione,stato
+SE-MI-001,Spazio Enel Milano Duomo,Milano,MI,Lombardia,GOLD,63,se-mi-001@spazioenel-mock.example,2026-03-15,attivo
+SE-RM-001,Spazio Enel Roma Prati,Roma,RM,Lazio,GOLD,70,se-rm-001@spazioenel-mock.example,2026-03-15,attivo
+SE-TO-001,Spazio Enel Torino Centro,Torino,TO,Piemonte,GOLD,76,se-to-001@spazioenel-mock.example,2026-03-15,attivo
+SE-NA-001,Spazio Enel Napoli Vomero,Napoli,NA,Campania,GOLD,90,se-na-001@spazioenel-mock.example,2026-03-15,attivo
+SE-BO-001,Spazio Enel Bologna Marconi,Bologna,BO,Emilia-Romagna,GOLD,76,se-bo-001@spazioenel-mock.example,2026-03-15,attivo
+SE-FI-001,Spazio Enel Firenze Novoli,Firenze,FI,Toscana,GOLD,80,se-fi-001@spazioenel-mock.example,2026-03-15,attivo
+SE-PA-001,Spazio Enel Palermo Libertà,Palermo,PA,Sicilia,GOLD,87,se-pa-001@spazioenel-mock.example,2026-03-15,attivo
+SE-MI-002,Spazio Enel Milano Bicocca,Milano,MI,Lombardia,SILVER,33,se-mi-002@spazioenel-mock.example,2026-03-15,attivo
+SE-RM-002,Spazio Enel Roma Eur,Roma,RM,Lazio,SILVER,58,se-rm-002@spazioenel-mock.example,2026-03-15,attivo
+SE-RM-003,Spazio Enel Roma Tuscolana,Roma,RM,Lazio,SILVER,37,se-rm-003@spazioenel-mock.example,2026-03-15,attivo
+SE-VR-001,Spazio Enel Verona Borgo Roma,Verona,VR,Veneto,SILVER,58,se-vr-001@spazioenel-mock.example,2026-03-15,attivo
+SE-BA-001,Spazio Enel Bari Poggiofranco,Bari,BA,Puglia,SILVER,49,se-ba-001@spazioenel-mock.example,2026-03-15,attivo
+SE-CT-001,Spazio Enel Catania Etnea,Catania,CT,Sicilia,SILVER,49,se-ct-001@spazioenel-mock.example,2026-03-15,attivo
+SE-GE-001,Spazio Enel Genova Sampierdarena,Genova,GE,Liguria,SILVER,47,se-ge-001@spazioenel-mock.example,2026-03-15,attivo
+SE-PD-001,Spazio Enel Padova Stanga,Padova,PD,Veneto,SILVER,43,se-pd-001@spazioenel-mock.example,2026-03-15,attivo
+SE-BS-001,Spazio Enel Brescia Due,Brescia,BS,Lombardia,SILVER,55,se-bs-001@spazioenel-mock.example,2026-03-15,attivo
+SE-AN-001,Spazio Enel Ancona Baraccola,Ancona,AN,Marche,BRONZE,29,se-an-001@spazioenel-mock.example,2026-03-15,attivo
+SE-PG-001,Spazio Enel Perugia Fontivegge,Perugia,PG,Umbria,BRONZE,27,se-pg-001@spazioenel-mock.example,2026-03-15,attivo
+SE-CA-001,Spazio Enel Cagliari Marconi,Cagliari,CA,Sardegna,BRONZE,26,se-ca-001@spazioenel-mock.example,2026-03-15,attivo
+SE-TS-001,Spazio Enel Trieste Borgo,Trieste,TS,Friuli-V.G.,BRONZE,19,se-ts-001@spazioenel-mock.example,2026-03-15,attivo
+SE-RE-001,Spazio Enel Reggio Emilia Sud,Reggio Emilia,RE,Emilia-Romagna,BRONZE,12,se-re-001@spazioenel-mock.example,2026-03-15,attivo
+SE-LE-001,Spazio Enel Lecce Mazzini,Lecce,LE,Puglia,BRONZE,14,se-le-001@spazioenel-mock.example,2026-03-15,attivo
+SE-PE-001,Spazio Enel Pescara Centro,Pescara,PE,Abruzzo,BRONZE,15,se-pe-001@spazioenel-mock.example,2026-03-15,attivo
+SE-VI-001,Spazio Enel Vicenza Ovest,Vicenza,VI,Veneto,BRONZE,21,se-vi-001@spazioenel-mock.example,2026-03-15,attivo
+SE-SA-001,Spazio Enel Salerno Irno,Salerno,SA,Campania,BRONZE,15,se-sa-001@spazioenel-mock.example,2026-03-15,attivo

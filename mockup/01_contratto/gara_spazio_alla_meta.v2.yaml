@@ -1,0 +1,135 @@
+# ============================================================================
+# CONTRATTO DI GARA — versione 2 (REVISIONE IN CORSO D'OPERA)
+# Scenario: a fine maggio il Promotore alza il cap commodity e i punti del
+# fotovoltaico per spingere le vendite. Il regolamento rivisto viene
+# RICOMPILATO: nasce la v2, valida dal 1° giugno (effective dating).
+# I mesi di aprile e maggio restano governati dalla v1.
+# ============================================================================
+
+meta:
+  gara: "Spazio alla Meta 2026"
+  codice: SAM2026
+  promotore: "Enel Energia S.p.A. (fittizio — mockup)"
+  agenzia: "H&A Motivation Company"
+  contratto_versione: 2
+  valido_dal: 2026-06-01            # effective dating: la v1 resta valida fino al 31/05
+  valido_al: 2026-09-30
+  fonte:
+    documento: "REGOLAMENTO_SPAZIO_ALLA_META_2026.md"
+    revisione: "rev. 1 del 2026-05-28 (integrazione artt. 5.1 e 5.3)"
+  compilazione:
+    report: "compilazione_report.json"
+    compilato_il: 2026-05-28
+  approvazione:
+    approvato_da: "b.giorgio (responsabile gara)"
+    approvato_il: 2026-05-29
+
+changelog:
+  - campo: "meccaniche.punti_commodity.cap_mensile_punti"
+    da: 600
+    a: 900
+    motivo: "vendite commodity oltre le attese: il cap stava demotivando i top performer"
+    fonte_clausola: "art. 5.1 (rev. 1)"
+  - campo: "meccaniche.punti_fotovoltaico.punti"
+    da: 150
+    a: 200
+    motivo: "spinta commerciale sul fotovoltaico nel secondo trimestre di gara"
+    fonte_clausola: "art. 5.3 (rev. 1)"
+
+destinatari:
+  tipo: punto_vendita
+  requisiti: "Spazio Enel Partner, stato attivo, adesione entro il 2026-03-31"
+  fonte_clausola: "art. 2"
+
+cluster:
+  criterio: "media mensile attivazioni commodity 2025"
+  fonte_clausola: "art. 4.1"
+  definizioni:
+    - { id: GOLD,   condizione: "media_2025 >= 60",        target_mensile_commodity: 80 }
+    - { id: SILVER, condizione: "30 <= media_2025 < 60",   target_mensile_commodity: 50 }
+    - { id: BRONZE, condizione: "media_2025 < 30",         target_mensile_commodity: 30 }
+
+kpi:
+  - { id: luce_gas,     descrizione: "Attivazione contratto Luce o Gas residenziale (commodity)" }
+  - { id: fibra,        descrizione: "Attivazione contratto Fibra" }
+  - { id: fotovoltaico, descrizione: "Vendita impianto fotovoltaico" }
+  - { id: wallbox,      descrizione: "Vendita wallbox di ricarica" }
+  - { id: clima,        descrizione: "Vendita climatizzatore" }
+
+meccaniche:
+  - id: punti_commodity
+    tipo: punti_per_unita
+    kpi: luce_gas
+    punti: 10
+    cap_mensile_punti: 900            # ← era 600 nella v1
+    note_cap: "il cap si applica agli accrediti lordi del mese; gli storni si sottraggono fuori cap"
+    fonte_clausola: "art. 5.1 (rev. 1), 5.6"
+
+  - id: punti_fibra
+    tipo: punti_per_unita
+    kpi: fibra
+    punti: 20
+    fonte_clausola: "art. 5.2"
+
+  - id: punti_fotovoltaico
+    tipo: punti_per_unita
+    kpi: fotovoltaico
+    punti: 200                        # ← era 150 nella v1
+    fonte_clausola: "art. 5.3 (rev. 1)"
+
+  - id: punti_wallbox
+    tipo: punti_per_unita
+    kpi: wallbox
+    punti: 60
+    fonte_clausola: "art. 5.4"
+
+  - id: punti_clima
+    tipo: punti_per_unita
+    kpi: clima
+    punti: 40
+    moltiplicatori:
+      - { periodi: ["2026-06", "2026-07"], fattore: 1.5, fonte_clausola: "art. 6.3 (acceleratore estivo)" }
+    fonte_clausola: "art. 5.5"
+
+  - id: storni
+    tipo: storno
+    regola: "annullamento/recesso/mancata attivazione entro 60 giorni dalla DATA DI ATTIVAZIONE → storno dei punti accreditati, anche in mesi successivi; non soggetto a cap"
+    fonte_clausola: "art. 5.7"
+
+  - id: bonus_obiettivo_mensile
+    tipo: bonus_condizionale
+    condizione: "attivazioni_commodity_nette_mese >= target_mensile_commodity del cluster"
+    punti: 200
+    ricorrenza: per_mese
+    liquidazione: solo_mese_concluso
+    fonte_clausola: "art. 6.1, 6.4"
+
+  - id: bonus_tripletta
+    tipo: bonus_condizionale
+    condizione: "fotovoltaico >= 1 AND wallbox >= 1 AND clima >= 1 nello stesso mese"
+    punti: 100
+    ricorrenza: per_mese
+    liquidazione: solo_mese_concluso
+    fonte_clausola: "art. 6.2, 6.4"
+
+classifica_finale:
+  ambito: per_cluster
+  indice: "punti_totali_mesi_conclusi / (target_mensile_commodity * mesi_conclusi)"
+  premi_punti_extra:
+    - { posizione: 1, punti: 5000 }
+    - { posizione: 2, punti: 3000 }
+    - { posizione: 3, punti: 1500 }
+  fonte_clausola: "art. 7"
+
+valorizzazione:
+  tasso_eur_per_punto: 0.25
+  catalogo: "Catalogo premi H&A 2026"
+  accredito: "mensile, entro il giorno 10 del mese successivo, previa validazione (HITL)"
+  fonte_clausola: "art. 8"
+
+caricamenti:
+  flusso_prestazioni: "mensile dal Promotore, entro il giorno 5 del mese successivo"
+  finestra_contestazioni_giorni: 30
+  fonte_clausola: "art. 9"
+
+clausole_da_verificare: []

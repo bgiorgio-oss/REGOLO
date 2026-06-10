@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REGOLO — Backoffice (control plane)</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  body { display:flex; min-height:100vh; }
+  aside { width:230px; background:#141a2e; color:#cdd4ea; padding:18px 14px; flex-shrink:0; }
+  aside .logo { font-size:20px; font-weight:800; color:#fff; margin-bottom:4px; }
+  aside .logo small { display:block; font-size:11px; font-weight:500; color:#8c96b8; }
+  aside nav { margin-top:18px; display:flex; flex-direction:column; gap:4px; }
+  aside nav a { display:block; padding:9px 12px; border-radius:9px; color:#cdd4ea; font-size:14px; }
+  aside nav a.attivo, aside nav a:hover { background:#222b49; color:#fff; }
+  main { flex:1; }
+  main .contenitore { max-width:1000px; }
+  section { display:none; } section.attiva { display:block; }
+  .clausola { border:1px solid var(--bordo); border-radius:12px; padding:14px; margin-bottom:10px; }
+  .conf-bar { height:7px; border-radius:99px; background:#e9edf6; overflow:hidden; width:120px; display:inline-block; vertical-align:middle; }
+  .escalation { background:#fbf6ea; border:1px solid #ecd9a8; border-radius:10px; padding:10px 12px; margin-top:10px; font-size:13.5px; }
+  .versione { border-left:3px solid var(--blu); padding:6px 12px; margin:8px 0; }
+</style>
+</head>
+<body>
+<aside>
+  <div class="logo">REGOLO <small>control plane — mockup</small></div>
+  <nav id="nav">
+    <a href="#panoramica" class="attivo">Panoramica</a>
+    <a href="#compilazione">Compilazione</a>
+    <a href="#riconciliazione">Riconciliazione</a>
+    <a href="#whatif">What-if</a>
+    <a href="#approvazioni">Approvazioni</a>
+    <a href="#alert">Alert qualità dati</a>
+    <a href="#ledger">Ledger</a>
+  </nav>
+  <p class="small" style="color:#8c96b8; margin-top:24px">Gara: <b style="color:#fff">SAM2026</b><br>
+  Spazio alla Meta 2026<br><a href="/" style="color:#9db4ff">→ frontend utente</a></p>
+</aside>
+
+<main>
+<div class="barra-brand"></div>
+<div class="contenitore">
+
+  <!-- ══════════ PANORAMICA ══════════ -->
+  <section id="panoramica" class="attiva">
+    <h1 style="margin-bottom:14px">Panoramica gara</h1>
+    <div class="riga" style="margin-bottom:16px" id="pan-kpi"></div>
+    <div class="card">
+      <h2>Contratto di Gara — versioni (effective dating)</h2>
+      <div id="pan-versioni"></div>
+      <p class="small muted" style="margin-top:8px">Ogni numero mostrato a un utente è risalibile a:
+      clausola del regolamento → regola del contratto (vN) → evento ledger → saldo.</p>
+    </div>
+    <div class="card">
+      <h2>Pipeline del dato</h2>
+      <p class="small" style="line-height:2">
+        📄 Regolamento (rev. 1) → 🤖 <b>Compilazione AI</b> (14 clausole, 2 escalation umane) →
+        ✅ Contratto v2 approvato → ⚙️ <b>Motore deterministico</b> (zero AI a runtime) →
+        📒 Ledger append-only → 🔌 API di serving → 🖥 Frontend / PIATTAFORMA legacy</p>
+    </div>
+  </section>
+
+  <!-- ══════════ COMPILAZIONE ══════════ -->
+  <section id="compilazione">
+    <h1 style="margin-bottom:6px">Compilazione del regolamento</h1>
+    <p class="muted small" style="margin-bottom:14px" id="comp-meta">—</p>
+    <div class="riga" style="margin-bottom:16px" id="comp-kpi"></div>
+    <div id="comp-clausole"></div>
+  </section>
+
+  <!-- ══════════ RICONCILIAZIONE ══════════ -->
+  <section id="riconciliazione">
+    <h1 style="margin-bottom:6px">Riconciliazione — shadow mode</h1>
+    <p class="muted small" style="margin-bottom:14px">Confronto notturno tra il calcolo REGOLO e i punteggi
+    della PIATTAFORMA legacy (aprile + maggio). Le divergenze hanno una diagnosi automatica.</p>
+    <div class="riga" style="margin-bottom:16px" id="ric-kpi"></div>
+    <div class="card">
+      <table><thead><tr><th>PV</th><th style="text-align:right">REGOLO</th>
+        <th style="text-align:right">Piattaforma</th><th style="text-align:right">Δ</th><th>Esito</th></tr></thead>
+        <tbody id="ric-righe"></tbody></table>
+    </div>
+  </section>
+
+  <!-- ══════════ WHAT-IF ══════════ -->
+  <section id="whatif">
+    <h1 style="margin-bottom:6px">What-if — replay retroattivo</h1>
+    <p class="muted small" style="margin-bottom:14px" id="wi-descr">—</p>
+    <div class="riga" style="margin-bottom:16px" id="wi-kpi"></div>
+    <div class="card">
+      <h2>Impatto per punto vendita (Δ maggiori)</h2>
+      <table><thead><tr><th>PV</th><th>Cluster</th><th style="text-align:right">Punti v1</th>
+        <th style="text-align:right">Punti v2 retro</th><th style="text-align:right">Δ</th></tr></thead>
+        <tbody id="wi-righe"></tbody></table>
+      <p class="small muted" style="margin-top:8px">Il replay è una riesecuzione integrale del motore con
+      la v2 su aprile+maggio: è così che una revisione di regolamento diventa un conguaglio
+      controllato invece di una richiesta di sviluppo.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ APPROVAZIONI ══════════ -->
+  <section id="approvazioni">
+    <h1 style="margin-bottom:6px">Approvazioni (HITL)</h1>
+    <p class="muted small" style="margin-bottom:14px">Nessun batch di credito viene contabilizzato senza
+    firma umana. L'AI propone, un umano approva.</p>
+    <div id="appr-lista"></div>
+  </section>
+
+  <!-- ══════════ ALERT ══════════ -->
+  <section id="alert">
+    <h1 style="margin-bottom:6px">Alert qualità dati</h1>
+    <p class="muted small" style="margin-bottom:14px">Input fuori scala rispetto allo storico: esclusi dal
+    calcolo (quarantena) finché non vengono verificati col Promotore.</p>
+    <div id="alert-lista"></div>
+  </section>
+
+  <!-- ══════════ LEDGER ══════════ -->
+  <section id="ledger">
+    <h1 style="margin-bottom:6px">Ledger eventi <span class="muted small" id="led-tot"></span></h1>
+    <p class="muted small" style="margin-bottom:14px">Append-only: i saldi sono somme di eventi, mai valori
+    sovrascritti. Filtra per punto vendita:</p>
+    <select id="led-filtro" style="margin-bottom:14px"><option value="">— tutti i PV —</option></select>
+    <div class="card">
+      <table><thead><tr><th>Id</th><th>Data</th><th>PV</th><th>Descrizione</th>
+        <th style="text-align:right">Punti</th><th>v</th><th>Stato</th></tr></thead>
+        <tbody id="led-righe"></tbody></table>
+    </div>
+  </section>
+
+  <div class="footer-demo">Mockup progetto <b>REGOLO</b> — dati interamente fittizi</div>
+</div>
+</main>
+
+<script>
+const fmt = n => n.toLocaleString("it-IT");
+const eur = n => n.toLocaleString("it-IT", {style:"currency", currency:"EUR"});
+const api = async p => (await fetch(p)).json();
+const kpiCard = (label, valore, sub) =>
+  `<div class="card flex1"><div class="kpi-label">${label}</div>
+   <div class="kpi-valore">${valore}</div><div class="kpi-sub">${sub || ""}</div></div>`;
+
+// navigazione a sezioni
+function vai(hash) {
+  document.querySelectorAll("section").forEach(s => s.classList.remove("attiva"));
+  document.querySelectorAll("#nav a").forEach(a => a.classList.remove("attivo"));
+  const id = (hash || "#panoramica").slice(1);
+  document.getElementById(id)?.classList.add("attiva");
+  document.querySelector(`#nav a[href="#${id}"]`)?.classList.add("attivo");
+}
+window.addEventListener("hashchange", () => vai(location.hash));
+
+async function init() {
+  const [gara, ric, wi, appr, alerts, comp, led, pvs] = await Promise.all([
+    api("/api/gara"), api("/api/riconciliazione"), api("/api/whatif"), api("/api/approvazioni"),
+    api("/api/alerts"), api("/api/compilazione"), api("/api/ledger?limit=100"), api("/api/pv")]);
+
+  // ----- panoramica -----
+  document.getElementById("pan-kpi").innerHTML =
+    kpiCard("Contratto attivo", "v" + gara.contratto_attivo, "dal 01/06 (effective dating)") +
+    kpiCard("Punti vendita", pvs.length, "3 cluster") +
+    kpiCard("Riconciliazione", `${ric.allineati}/${ric.pv_totali}`, ric.divergenze + " divergenze trovate") +
+    kpiCard("Alert aperti", alerts.length, "quarantena dati");
+  document.getElementById("pan-versioni").innerHTML = gara.versioni_contratto.map(v =>
+    `<div class="versione"><b>v${v.v}</b> — valida dal ${v.valido_dal} · approvata il ${v.approvato_il}
+     ${v.changelog ? '<div class="small muted">' + v.changelog.join(" · ") + "</div>" : ""}</div>`).join("");
+
+  // ----- compilazione -----
+  const s = comp.statistiche;
+  document.getElementById("comp-meta").textContent =
+    `${comp.documento_fonte} (${comp.revisione_fonte}) · compilato il ${comp.data_compilazione} · ` +
+    `approvato da ${comp.approvato_da} il ${comp.approvato_il}`;
+  document.getElementById("comp-kpi").innerHTML =
+    kpiCard("Clausole analizzate", s.clausole_analizzate, "") +
+    kpiCard("Interpretate auto", s.interpretate_automaticamente, "confidenza ≥ soglia") +
+    kpiCard("Escalation a umano", s.escalation_verifica_umana, "ambiguità bloccanti, poi risolte");
+  document.getElementById("comp-clausole").innerHTML = comp.clausole.map(c => {
+    const colore = c.confidenza >= 0.85 ? "var(--ok)" : c.confidenza >= 0.7 ? "var(--warn)" : "var(--ko)";
+    return `<div class="clausola">
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+        <b>${c.id} · ${c.articolo}</b>
+        <span class="conf-bar"><span style="display:block;height:100%;width:${Math.round(c.confidenza*100)}%;background:${colore}"></span></span>
+        <span class="small muted">confidenza ${(c.confidenza*100).toFixed(0)}%</span>
+        ${c.stato === "auto" ? '<span class="chip ok">auto</span>'
+                             : '<span class="chip warn">verificata da umano</span>'}
+      </div>
+      <div class="small muted" style="margin:8px 0 4px">«${c.testo_estratto}»</div>
+      <div class="small"><b>Interpretazione:</b> ${c.interpretazione}</div>
+      ${c.escalation ? `<div class="escalation">⚠️ <b>${c.escalation.motivo}</b><br>
+        ✔ ${c.escalation.risoluzione}<br>
+        <span class="muted">${c.escalation.fonte_risoluzione} — verificato da ${c.escalation.verificato_da}
+        il ${c.escalation.verificato_il}</span></div>` : ""}
+    </div>`;
+  }).join("");
+
+  // ----- riconciliazione -----
+  document.getElementById("ric-kpi").innerHTML =
+    kpiCard("PV confrontati", ric.pv_totali, ric.periodi.join(" + ")) +
+    kpiCard("Allineati", ric.allineati, "Δ = 0") +
+    kpiCard("Divergenze", ric.divergenze, "con diagnosi automatica");
+  document.getElementById("ric-righe").innerHTML = ric.righe.map(r =>
+    `<tr class="${r.esito === "KO" ? "evidenzia" : ""}">
+      <td>${r.pv}<div class="small muted">${r.insegna}</div></td>
+      <td style="text-align:right">${fmt(r.punti_regolo)}</td>
+      <td style="text-align:right">${fmt(r.punti_piattaforma)}</td>
+      <td style="text-align:right" class="${r.delta ? "punti-neg" : ""}">${r.delta > 0 ? "+" : ""}${fmt(r.delta)}</td>
+      <td>${r.esito === "OK" ? '<span class="chip ok">OK</span>' : '<span class="chip ko">KO</span>'}
+      ${r.diagnosi ? '<div class="small" style="max-width:330px;margin-top:4px">🔎 ' + r.diagnosi + "</div>" : ""}</td></tr>`).join("");
+
+  // ----- what-if -----
+  document.getElementById("wi-descr").textContent = wi.descrizione;
+  document.getElementById("wi-kpi").innerHTML =
+    kpiCard("Δ punti totale", "+" + fmt(wi.delta_punti_totale), "v2 retroattiva vs corso effettivo") +
+    kpiCard("Δ budget premi", "+" + eur(wi.delta_budget_eur), "a 0,25 €/punto") +
+    kpiCard("PV impattati", wi.pv_impattati, "su " + wi.righe.length);
+  document.getElementById("wi-righe").innerHTML = wi.righe.slice(0, 12).map(r =>
+    `<tr><td>${r.pv}<div class="small muted">${r.insegna}</div></td><td>${r.cluster}</td>
+      <td style="text-align:right">${fmt(r.punti_v1)}</td>
+      <td style="text-align:right">${fmt(r.punti_v2_retro)}</td>
+      <td style="text-align:right" class="punti-pos">+${fmt(r.delta)}</td></tr>`).join("");
+
+  // ----- approvazioni -----
+  document.getElementById("appr-lista").innerHTML = appr.map((a, i) => `
+    <div class="card"><div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap">
+      <div style="flex:1"><b>${a.batch}</b>
+        <div class="small muted">${fmt(a.punti)} punti${a.valore_eur ? " · " + eur(a.valore_eur) : ""}
+        ${a.pv_coinvolti ? " · " + a.pv_coinvolti + " PV" : ""}${a.nota ? " · " + a.nota : ""}</div>
+        ${a.approvato_da ? `<div class="small muted">approvato da ${a.approvato_da} il ${a.approvato_il}</div>` : ""}</div>
+      ${a.stato === "approvato"
+        ? '<span class="chip ok">approvato</span>'
+        : `<span class="chip warn" id="appr-chip-${i}">in attesa</span>
+           <button class="primario" id="appr-btn-${i}"
+             onclick="document.getElementById('appr-chip-${i}').outerHTML='<span class=&quot;chip ok&quot;>approvato (demo)</span>';this.disabled=true">
+             Approva batch</button>`}
+    </div></div>`).join("");
+
+  // ----- alert -----
+  document.getElementById("alert-lista").innerHTML = alerts.length ? alerts.map(a => `
+    <div class="card"><b>⚠️ ${a.pv} — periodo ${a.periodo}</b>
+      <span class="chip warn" style="margin-left:8px">${a.stato}</span>
+      <p class="small" style="margin-top:8px">${a.dettaglio}</p></div>`).join("")
+    : '<div class="card muted">Nessun alert aperto.</div>';
+
+  // ----- ledger -----
+  const sel = document.getElementById("led-filtro");
+  sel.innerHTML += pvs.map(p => `<option value="${p.codice}">${p.codice} — ${p.insegna}</option>`).join("");
+  const renderLedger = d => {
+    document.getElementById("led-tot").textContent = `(${d.totale} eventi, mostro i più recenti)`;
+    document.getElementById("led-righe").innerHTML = d.eventi.map(e =>
+      `<tr><td class="muted small">${e.id}</td><td class="muted">${e.ts.slice(0,10)}</td><td>${e.pv}</td>
+        <td class="small">${e.descrizione}</td>
+        <td style="text-align:right" class="${e.punti < 0 ? "punti-neg" : "punti-pos"}">${e.punti > 0 ? "+" : ""}${fmt(e.punti)}</td>
+        <td class="muted small">v${e.contratto_v}</td>
+        <td>${e.stato === "contabilizzato" ? '<span class="chip ok">contab.</span>' : '<span class="chip warn">in appr.</span>'}</td></tr>`).join("");
+  };
+  renderLedger(led);
+  sel.onchange = async () => renderLedger(await api("/api/ledger?limit=100" + (sel.value ? "&pv=" + sel.value : "")));
+
+  vai(location.hash);
+}
+init();
+</script>
+</body>
+</html>
