@@ -56,6 +56,9 @@ PIATTAFORMA, su una gara vera già attiva.
   regolamento, inclusi i casi limite; verdi prima di procedere
 
 ### Blocco 1.3 — Motore e riconciliazione (settimane 5–6)
+- ⬜ **Spike GoRules ZEN Engine** (MIT, `pip install zen-engine`): transpilare il contratto
+  SAM2026 in JDM, eseguirlo e confrontare coi 392 eventi del nostro motore — se regge,
+  L2 = ZEN + nostro layer effective dating/replay (vedi `docs/RICERCA_PROGETTI_SIMILI.md`)
 - ⬜ Adattare il motore alle meccaniche del contratto pilota (parametrico, zero hardcode)
 - ⬜ Ledger su DB (SQLite per la fase 1 basta) + run replay-abili
 - ⬜ Job notturno di riconciliazione: REGOLO vs export piattaforma, con diagnosi automatica
