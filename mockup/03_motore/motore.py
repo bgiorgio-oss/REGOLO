@@ -323,6 +323,9 @@ def main() -> None:
         stato_pv[codice] = dict(
             codice=codice, insegna=anag["insegna"], citta=anag["citta"],
             cluster=anag["cluster"],
+            provincia=anag["provincia"], regione=anag["regione"],
+            email=anag["email_referente"], media_2025=int(anag["media_2025"]),
+            data_adesione=anag["data_adesione"], stato_pv=anag["stato"],
             saldo_contabilizzato=contab, saldo_in_approvazione=in_appr,
             valore_eur=round(contab * tasso, 2), breakdown=breakdown, mesi=mesi,
             movimenti=movimenti)
@@ -376,12 +379,22 @@ def main() -> None:
 
     # ----- catalogo e comunicazioni (statici nel mockup) ----------------------
     catalogo = [
-        dict(nome="Gift card multimarca 25 €", punti=100, categoria="Gift card"),
-        dict(nome="Buono carburante 50 €", punti=200, categoria="Gift card"),
-        dict(nome="Smartwatch sport", punti=700, categoria="Tecnologia"),
-        dict(nome="Weekend benessere per 2", punti=1200, categoria="Viaggi"),
-        dict(nome="Smart TV 55\"", punti=2000, categoria="Tecnologia"),
-        dict(nome="Viaggio capitali europee per 2", punti=3600, categoria="Viaggi"),
+        dict(id="gift25", emoji="🎁", nome="Gift card multimarca 25 €", punti=100,
+             categoria="Gift card", consegna="codice via email, 2 gg lavorativi"),
+        dict(id="carb50", emoji="⛽", nome="Buono carburante 50 €", punti=200,
+             categoria="Gift card", consegna="codice via email, 2 gg lavorativi"),
+        dict(id="gourmet", emoji="🧺", nome="Cesto gourmet regionale", punti=300,
+             categoria="Casa & Gusto", consegna="corriere, 7 gg lavorativi"),
+        dict(id="cuffie", emoji="🎧", nome="Cuffie noise cancelling", punti=450,
+             categoria="Tecnologia", consegna="corriere, 5 gg lavorativi"),
+        dict(id="watch", emoji="⌚", nome="Smartwatch sport", punti=700,
+             categoria="Tecnologia", consegna="corriere, 5 gg lavorativi"),
+        dict(id="spa", emoji="💆", nome="Weekend benessere per 2", punti=1200,
+             categoria="Viaggi", consegna="voucher nominativo, validità 12 mesi"),
+        dict(id="tv55", emoji="📺", nome="Smart TV 55\"", punti=2000,
+             categoria="Tecnologia", consegna="corriere, 10 gg lavorativi"),
+        dict(id="viaggio", emoji="✈️", nome="Viaggio capitali europee per 2", punti=3600,
+             categoria="Viaggi", consegna="agenzia dedicata, date da concordare"),
     ]
     comunicazioni = [
         dict(data="2026-06-01", titolo="Acceleratore estivo attivo",

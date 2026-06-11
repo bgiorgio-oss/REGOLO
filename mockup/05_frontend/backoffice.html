@@ -7,282 +7,611 @@
 <link rel="stylesheet" href="/static/style.css">
 <style>
   body { display:flex; min-height:100vh; }
-  aside { width:230px; background:#141a2e; color:#cdd4ea; padding:18px 14px; flex-shrink:0; }
-  aside .logo { font-size:20px; font-weight:800; color:#fff; margin-bottom:4px; }
+  aside { width:236px; background:#141a2e; color:#cdd4ea; padding:18px 14px; flex-shrink:0;
+          display:flex; flex-direction:column; }
+  aside .logo { font-size:20px; font-weight:800; color:#fff; }
   aside .logo small { display:block; font-size:11px; font-weight:500; color:#8c96b8; }
-  aside nav { margin-top:18px; display:flex; flex-direction:column; gap:4px; }
-  aside nav a { display:block; padding:9px 12px; border-radius:9px; color:#cdd4ea; font-size:14px; }
+  aside nav { margin-top:16px; display:flex; flex-direction:column; gap:3px; }
+  aside nav a { display:flex; align-items:center; gap:9px; padding:8px 11px; border-radius:9px;
+                color:#cdd4ea; font-size:13.5px; }
   aside nav a.attivo, aside nav a:hover { background:#222b49; color:#fff; }
-  main { flex:1; }
-  main .contenitore { max-width:1000px; }
-  section { display:none; } section.attiva { display:block; }
-  .clausola { border:1px solid var(--bordo); border-radius:12px; padding:14px; margin-bottom:10px; }
-  .conf-bar { height:7px; border-radius:99px; background:#e9edf6; overflow:hidden; width:120px; display:inline-block; vertical-align:middle; }
-  .escalation { background:#fbf6ea; border:1px solid #ecd9a8; border-radius:10px; padding:10px 12px; margin-top:10px; font-size:13.5px; }
-  .versione { border-left:3px solid var(--blu); padding:6px 12px; margin:8px 0; }
+  aside nav a .badge { margin-left:auto; background:var(--ko); color:#fff; font-size:10.5px;
+                       border-radius:99px; padding:1px 7px; }
+  aside .fondo { margin-top:auto; padding-top:14px; border-top:1px solid #232c4c; font-size:12px; color:#8c96b8; }
+  main { flex:1; min-width:0; }
+  main .contenitore { max-width:1020px; }
+  section.vista { display:none; } section.vista.attiva { display:block; animation:appare .22s ease; }
+  .clausola { border:1px solid var(--bordo); border-radius:12px; padding:13px 15px; margin-bottom:10px; background:#fff; }
+  .conf-bar { height:7px; border-radius:99px; background:#e9edf6; overflow:hidden; width:110px;
+              display:inline-block; vertical-align:middle; }
+  .escalation { background:#fbf6ea; border:1px solid #ecd9a8; border-radius:10px; padding:10px 12px;
+                margin-top:10px; font-size:13.5px; }
+  .testata-vista { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:4px 0 14px; }
+  .testata-vista p { width:100%; }
 </style>
 </head>
 <body>
 <aside>
   <div class="logo">REGOLO <small>control plane — mockup</small></div>
   <nav id="nav">
-    <a href="#panoramica" class="attivo">Panoramica</a>
-    <a href="#compilazione">Compilazione</a>
-    <a href="#riconciliazione">Riconciliazione</a>
-    <a href="#whatif">What-if</a>
-    <a href="#approvazioni">Approvazioni</a>
-    <a href="#alert">Alert qualità dati</a>
-    <a href="#ledger">Ledger</a>
+    <a href="#panoramica" class="attivo">📊 Panoramica</a>
+    <a href="#gare">🏁 Gare</a>
+    <a href="#compilazione">🤖 Compilazione</a>
+    <a href="#caricamenti">📥 Caricamenti</a>
+    <a href="#riconciliazione">🔍 Riconciliazione</a>
+    <a href="#whatif">🧪 What-if</a>
+    <a href="#approvazioni">✍️ Approvazioni<span class="badge" id="b-appr" style="display:none"></span></a>
+    <a href="#anagrafica">👥 Anagrafica</a>
+    <a href="#assistenza">🎧 Assistenza<span class="badge" id="b-tck" style="display:none"></span></a>
+    <a href="#comunicazioni">📣 Comunicazioni</a>
+    <a href="#alert">⚠️ Alert<span class="badge" id="b-alert" style="display:none"></span></a>
+    <a href="#ledger">📒 Ledger</a>
   </nav>
-  <p class="small" style="color:#8c96b8; margin-top:24px">Gara: <b style="color:#fff">SAM2026</b><br>
-  Spazio alla Meta 2026<br><a href="/" style="color:#9db4ff">→ frontend utente</a></p>
+  <div class="fondo">
+    Gara attiva: <b style="color:#fff">SAM2026</b><br>Spazio alla Meta 2026<br><br>
+    <a href="/" style="color:#9db4ff">→ frontend punto vendita</a><br><br>
+    <button class="pericolo" style="width:100%; font-size:12.5px" id="btn-reset">↺ Reset demo</button>
+  </div>
 </aside>
 
 <main>
 <div class="barra-brand"></div>
 <div class="contenitore">
 
-  <!-- ══════════ PANORAMICA ══════════ -->
-  <section id="panoramica" class="attiva">
-    <h1 style="margin-bottom:14px">Panoramica gara</h1>
-    <div class="riga" style="margin-bottom:16px" id="pan-kpi"></div>
-    <div class="card">
-      <h2>Contratto di Gara — versioni (effective dating)</h2>
-      <div id="pan-versioni"></div>
-      <p class="small muted" style="margin-top:8px">Ogni numero mostrato a un utente è risalibile a:
-      clausola del regolamento → regola del contratto (vN) → evento ledger → saldo.</p>
+<!-- ════════ PANORAMICA ════════ -->
+<section id="panoramica" class="vista attiva">
+  <div class="testata-vista"><h1>Panoramica</h1><span class="chip viola" id="p-contratto">—</span></div>
+  <div class="riga" style="margin-bottom:16px" id="p-kpi"></div>
+  <div class="riga">
+    <div class="card flex1" style="min-width:330px">
+      <h2>Punti erogati per mese</h2>
+      <div id="p-mesi"></div>
+      <p class="small muted" style="margin-top:8px">Fonte: batch di accredito (ledger). Giugno è
+      parziale e segue l'approvazione HITL.</p>
     </div>
-    <div class="card">
-      <h2>Pipeline del dato</h2>
-      <p class="small" style="line-height:2">
-        📄 Regolamento (rev. 1) → 🤖 <b>Compilazione AI</b> (14 clausole, 2 escalation umane) →
-        ✅ Contratto v2 approvato → ⚙️ <b>Motore deterministico</b> (zero AI a runtime) →
-        📒 Ledger append-only → 🔌 API di serving → 🖥 Frontend / PIATTAFORMA legacy</p>
+    <div class="card flex1" style="min-width:330px">
+      <h2>Attività recente</h2>
+      <div id="p-attivita"></div>
     </div>
-  </section>
+  </div>
+  <div class="card">
+    <h2>Pipeline del dato</h2>
+    <p class="small" style="line-height:2.1">
+      📄 Regolamento (rev. 1) → 🤖 <b>Compilazione AI</b> → ✅ Contratto v2 approvato →
+      ⚙️ <b>Motore deterministico</b> (zero AI a runtime) → 📒 Ledger append-only →
+      🔌 API di serving → 🖥 Frontend / PIATTAFORMA legacy</p>
+  </div>
+</section>
 
-  <!-- ══════════ COMPILAZIONE ══════════ -->
-  <section id="compilazione">
-    <h1 style="margin-bottom:6px">Compilazione del regolamento</h1>
-    <p class="muted small" style="margin-bottom:14px" id="comp-meta">—</p>
-    <div id="comp-ai"></div>
-    <div class="riga" style="margin-bottom:16px" id="comp-kpi"></div>
-    <div id="comp-clausole"></div>
-  </section>
-
-  <!-- ══════════ RICONCILIAZIONE ══════════ -->
-  <section id="riconciliazione">
-    <h1 style="margin-bottom:6px">Riconciliazione — shadow mode</h1>
-    <p class="muted small" style="margin-bottom:14px">Confronto notturno tra il calcolo REGOLO e i punteggi
-    della PIATTAFORMA legacy (aprile + maggio). Le divergenze hanno una diagnosi automatica.</p>
-    <div class="riga" style="margin-bottom:16px" id="ric-kpi"></div>
-    <div class="card">
-      <table><thead><tr><th>PV</th><th style="text-align:right">REGOLO</th>
-        <th style="text-align:right">Piattaforma</th><th style="text-align:right">Δ</th><th>Esito</th></tr></thead>
-        <tbody id="ric-righe"></tbody></table>
+<!-- ════════ GARE ════════ -->
+<section id="gare" class="vista">
+  <div class="testata-vista"><h1>Gare</h1>
+    <div class="spacer"></div>
+    <button class="primario" onclick="modaleNuovaGara()">+ Nuova gara da regolamento</button></div>
+  <div class="card">
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+      <h2 style="margin:0">Spazio alla Meta 2026</h2>
+      <span class="chip ok">attiva</span><span class="chip">SAM2026</span>
+      <span class="chip blu" id="g-giorni">—</span>
     </div>
-  </section>
-
-  <!-- ══════════ WHAT-IF ══════════ -->
-  <section id="whatif">
-    <h1 style="margin-bottom:6px">What-if — replay retroattivo</h1>
-    <p class="muted small" style="margin-bottom:14px" id="wi-descr">—</p>
-    <div class="riga" style="margin-bottom:16px" id="wi-kpi"></div>
-    <div class="card">
-      <h2>Impatto per punto vendita (Δ maggiori)</h2>
-      <table><thead><tr><th>PV</th><th>Cluster</th><th style="text-align:right">Punti v1</th>
-        <th style="text-align:right">Punti v2 retro</th><th style="text-align:right">Δ</th></tr></thead>
-        <tbody id="wi-righe"></tbody></table>
-      <p class="small muted" style="margin-top:8px">Il replay è una riesecuzione integrale del motore con
-      la v2 su aprile+maggio: è così che una revisione di regolamento diventa un conguaglio
-      controllato invece di una richiesta di sviluppo.</p>
+    <p class="small muted" style="margin:8px 0 12px" id="g-periodo">—</p>
+    <h3>Versioni del contratto (effective dating)</h3>
+    <div id="g-versioni" style="margin-top:6px"></div>
+    <div class="riga" style="margin-top:14px">
+      <div class="card flex1" style="box-shadow:none; background:#f8fafe">
+        <b>📄 Regolamento</b><p class="small muted" style="margin-top:4px">
+        mockup/00_regolamento/REGOLAMENTO_SPAZIO_ALLA_META_2026.md — 12 articoli, rev. 1 del 28/05</p></div>
+      <div class="card flex1" style="box-shadow:none; background:#f8fafe">
+        <b>📐 Contratti YAML</b><p class="small muted" style="margin-top:4px">
+        mockup/01_contratto/gara_spazio_alla_meta.v1.yaml · .v2.yaml — ogni regola cita la clausola</p></div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ══════════ APPROVAZIONI ══════════ -->
-  <section id="approvazioni">
-    <h1 style="margin-bottom:6px">Approvazioni (HITL)</h1>
-    <p class="muted small" style="margin-bottom:14px">Nessun batch di credito viene contabilizzato senza
-    firma umana. L'AI propone, un umano approva.</p>
-    <div id="appr-lista"></div>
-  </section>
+<!-- ════════ COMPILAZIONE ════════ -->
+<section id="compilazione" class="vista">
+  <div class="testata-vista"><h1>Compilazione del regolamento</h1>
+    <p class="muted small" id="comp-meta">—</p></div>
+  <div id="comp-ai"></div>
+  <div class="riga" style="margin-bottom:16px" id="comp-kpi"></div>
+  <div id="comp-clausole"></div>
+</section>
 
-  <!-- ══════════ ALERT ══════════ -->
-  <section id="alert">
-    <h1 style="margin-bottom:6px">Alert qualità dati</h1>
-    <p class="muted small" style="margin-bottom:14px">Input fuori scala rispetto allo storico: esclusi dal
-    calcolo (quarantena) finché non vengono verificati col Promotore.</p>
-    <div id="alert-lista"></div>
-  </section>
+<!-- ════════ CARICAMENTI ════════ -->
+<section id="caricamenti" class="vista">
+  <div class="testata-vista"><h1>Caricamento dati di prestazione</h1>
+    <p class="muted small">Flusso B: il file viene validato (schema, codici PV, valori, anomalie vs
+    storico) prima di entrare nel motore. Trascina un CSV per provare la validazione reale —
+    es. <code>mockup/02_dati/prestazioni_2026-06.csv</code>.</p></div>
+  <div class="dropzone" id="dropzone">
+    <div style="font-size:30px">📥</div>
+    <b>Trascina qui il file prestazioni</b> oppure clicca per sceglierlo<br>
+    <span class="small">CSV — colonne: periodo, codice_pv, luce_gas, fibra, fotovoltaico, wallbox,
+    clima, storni_luce_gas, storni_fibra</span>
+    <input type="file" id="file-input" accept=".csv" style="display:none">
+  </div>
+  <div id="caric-report" style="margin-top:16px"></div>
+  <div class="card" style="margin-top:16px">
+    <h2>Storico caricamenti</h2>
+    <table><thead><tr><th>File</th><th>Data</th><th style="text-align:right">Righe</th><th>Esito</th><th>Nota</th></tr></thead>
+    <tbody id="caric-storico"></tbody></table>
+  </div>
+</section>
 
-  <!-- ══════════ LEDGER ══════════ -->
-  <section id="ledger">
-    <h1 style="margin-bottom:6px">Ledger eventi <span class="muted small" id="led-tot"></span></h1>
-    <p class="muted small" style="margin-bottom:14px">Append-only: i saldi sono somme di eventi, mai valori
-    sovrascritti. Filtra per punto vendita:</p>
-    <select id="led-filtro" style="margin-bottom:14px"><option value="">— tutti i PV —</option></select>
-    <div class="card">
-      <table><thead><tr><th>Id</th><th>Data</th><th>PV</th><th>Descrizione</th>
-        <th style="text-align:right">Punti</th><th>v</th><th>Stato</th></tr></thead>
-        <tbody id="led-righe"></tbody></table>
+<!-- ════════ RICONCILIAZIONE ════════ -->
+<section id="riconciliazione" class="vista">
+  <div class="testata-vista"><h1>Riconciliazione — shadow mode</h1>
+    <p class="muted small">Confronto notturno tra REGOLO e la PIATTAFORMA legacy (aprile + maggio).
+    Le divergenze hanno diagnosi automatica.</p></div>
+  <div class="riga" style="margin-bottom:16px" id="ric-kpi"></div>
+  <div class="card">
+    <table><thead><tr><th>PV</th><th style="text-align:right">REGOLO</th>
+      <th style="text-align:right">Piattaforma</th><th style="text-align:right">Δ</th><th>Esito</th></tr></thead>
+      <tbody id="ric-righe"></tbody></table>
+  </div>
+</section>
+
+<!-- ════════ WHAT-IF ════════ -->
+<section id="whatif" class="vista">
+  <div class="testata-vista"><h1>What-if — replay retroattivo</h1>
+    <p class="muted small" id="wi-descr">—</p></div>
+  <div class="riga" style="margin-bottom:16px" id="wi-kpi"></div>
+  <div class="card">
+    <h2>Impatto per punto vendita (Δ maggiori)</h2>
+    <table><thead><tr><th>PV</th><th>Cluster</th><th style="text-align:right">Punti v1</th>
+      <th style="text-align:right">Punti v2 retro</th><th style="text-align:right">Δ</th></tr></thead>
+      <tbody id="wi-righe"></tbody></table>
+    <p class="small muted" style="margin-top:8px">Il replay è una riesecuzione reale del motore con la
+    v2 su aprile+maggio: le revisioni diventano conguagli controllati, non change request.</p>
+  </div>
+</section>
+
+<!-- ════════ APPROVAZIONI ════════ -->
+<section id="approvazioni" class="vista">
+  <div class="testata-vista"><h1>Approvazioni (HITL)</h1>
+    <p class="muted small">Nessun batch di credito viene contabilizzato senza firma umana.
+    L'approvazione qui sotto è <b>reale</b>: sposta gli eventi di giugno in «contabilizzato»
+    e aggiorna i saldi che i PV vedono sul frontend.</p></div>
+  <div id="appr-lista"></div>
+</section>
+
+<!-- ════════ ANAGRAFICA ════════ -->
+<section id="anagrafica" class="vista">
+  <div class="testata-vista"><h1>Anagrafica punti vendita</h1>
+    <div class="spacer"></div>
+    <input id="ana-cerca" placeholder="🔎 cerca per codice, città, insegna…" style="min-width:240px">
+    <button class="primario" onclick="modaleNuovoPV()">+ Nuovo PV</button></div>
+  <div class="card">
+    <table><thead><tr><th>PV</th><th>Località</th><th>Cluster</th><th style="text-align:right">Media 2025</th>
+      <th style="text-align:right">Saldo disp.</th><th>Pos.</th><th>Stato</th><th></th></tr></thead>
+      <tbody id="ana-righe"></tbody></table>
+  </div>
+  <p class="small muted">La scrittura dell'anagrafica verso la PIATTAFORMA legacy (write-back) arriva
+  in Fase 2 — qui la modifica è dimostrativa. La dedup AI-assistita è prevista nel control plane reale.</p>
+</section>
+
+<!-- ════════ ASSISTENZA ════════ -->
+<section id="assistenza" class="vista">
+  <div class="testata-vista"><h1>Contact center — coda richieste</h1>
+    <p class="muted small">I ticket aperti dai PV sul frontend arrivano qui. La risposta è
+    <b>reale</b>: il PV la vede nella sua area assistenza.</p></div>
+  <div id="tck-lista"></div>
+</section>
+
+<!-- ════════ COMUNICAZIONI ════════ -->
+<section id="comunicazioni" class="vista">
+  <div class="testata-vista"><h1>Comunicazioni</h1>
+    <p class="muted small">Le comunicazioni pubblicate qui compaiono subito nella sezione News del
+    frontend (azione reale).</p></div>
+  <div class="riga">
+    <div class="card flex1" style="min-width:320px">
+      <h2>Pubblica comunicazione</h2>
+      <label class="campo">Titolo</label>
+      <input id="com-titolo" style="width:100%" placeholder="es. Nuovi premi a catalogo da luglio">
+      <label class="campo">Testo</label>
+      <textarea id="com-testo" placeholder="Testo della comunicazione…"></textarea>
+      <div style="display:flex; justify-content:flex-end; margin-top:12px">
+        <button class="primario" id="com-invia">Pubblica</button></div>
     </div>
-  </section>
+    <div class="card flex1" style="min-width:320px">
+      <h2>Pubblicate</h2>
+      <div id="com-lista"></div>
+    </div>
+  </div>
+</section>
 
-  <div class="footer-demo">Mockup progetto <b>REGOLO</b> — dati interamente fittizi</div>
+<!-- ════════ ALERT ════════ -->
+<section id="alert" class="vista">
+  <div class="testata-vista"><h1>Alert qualità dati</h1>
+    <p class="muted small">Input fuori scala rispetto allo storico: esclusi dal calcolo (quarantena)
+    finché non vengono verificati.</p></div>
+  <div id="alert-lista"></div>
+</section>
+
+<!-- ════════ LEDGER ════════ -->
+<section id="ledger" class="vista">
+  <div class="testata-vista"><h1>Ledger eventi <span class="muted small" id="led-tot"></span></h1>
+    <div class="spacer"></div>
+    <select id="led-filtro"><option value="">— tutti i PV —</option></select></div>
+  <div class="card">
+    <table><thead><tr><th>Id</th><th>Data</th><th>PV</th><th>Descrizione</th>
+      <th style="text-align:right">Punti</th><th>v</th><th>Stato</th></tr></thead>
+      <tbody id="led-righe"></tbody></table>
+  </div>
+  <p class="small muted">Append-only: i saldi sono somme di eventi, mai valori sovrascritti.
+  Le spese a catalogo (runtime) compaiono nei movimenti dei singoli PV.</p>
+</section>
+
+<div class="footer-demo">Mockup progetto <b>REGOLO</b> — dati interamente fittizi</div>
 </div>
 </main>
 
+<div class="modale-sfondo" id="modale-sfondo"><div class="modale" id="modale"></div></div>
+<div id="toasts"></div>
+
 <script>
+/* ---------- helper ---------- */
+const $ = id => document.getElementById(id);
 const fmt = n => n.toLocaleString("it-IT");
 const eur = n => n.toLocaleString("it-IT", {style:"currency", currency:"EUR"});
-const api = async p => (await fetch(p)).json();
+const api = async p => { const r = await fetch(p); if (!r.ok) throw (await r.json()); return r.json(); };
+const apiPost = async (p, corpo) => {
+  const r = await fetch(p, {method:"POST", headers:{"Content-Type":"application/json"},
+                            body: corpo ? JSON.stringify(corpo) : "{}"});
+  const d = await r.json(); if (!r.ok) throw d; return d;
+};
+function toast(msg, tipo) { const t = document.createElement("div");
+  t.className = "toast " + (tipo || ""); t.textContent = msg;
+  $("toasts").appendChild(t); setTimeout(() => t.remove(), 4200); }
+function apriModale(html) { $("modale").innerHTML = html; $("modale-sfondo").classList.add("aperta"); }
+function chiudiModale() { $("modale-sfondo").classList.remove("aperta"); }
+$("modale-sfondo").onclick = e => { if (e.target.id === "modale-sfondo") chiudiModale(); };
 const kpiCard = (label, valore, sub) =>
   `<div class="card flex1"><div class="kpi-label">${label}</div>
-   <div class="kpi-valore">${valore}</div><div class="kpi-sub">${sub || ""}</div></div>`;
+   <div class="kpi-valore num">${valore}</div><div class="kpi-sub">${sub || ""}</div></div>`;
 
-// navigazione a sezioni
+let D = {};  // dati correnti
+
+/* ---------- routing ---------- */
 function vai(hash) {
-  document.querySelectorAll("section").forEach(s => s.classList.remove("attiva"));
-  document.querySelectorAll("#nav a").forEach(a => a.classList.remove("attivo"));
   const id = (hash || "#panoramica").slice(1);
-  document.getElementById(id)?.classList.add("attiva");
-  document.querySelector(`#nav a[href="#${id}"]`)?.classList.add("attivo");
+  document.querySelectorAll("section.vista").forEach(s => s.classList.remove("attiva"));
+  document.querySelectorAll("#nav a").forEach(a => a.classList.remove("attivo"));
+  ($(id) || $("panoramica")).classList.add("attiva");
+  const tab = document.querySelector(`#nav a[href="#${id}"]`); if (tab) tab.classList.add("attivo");
 }
 window.addEventListener("hashchange", () => vai(location.hash));
 
-async function init() {
-  const [gara, ric, wi, appr, alerts, comp, led, pvs] = await Promise.all([
+/* ---------- caricamento dati ---------- */
+async function carica() {
+  const [gara, ric, wi, appr, alerts, comp, led, pvs, anag, tck, com, caric, ordini] = await Promise.all([
     api("/api/gara"), api("/api/riconciliazione"), api("/api/whatif"), api("/api/approvazioni"),
-    api("/api/alerts"), api("/api/compilazione"), api("/api/ledger?limit=100"), api("/api/pv")]);
+    api("/api/alerts"), api("/api/compilazione"), api("/api/ledger?limit=100"), api("/api/pv"),
+    api("/api/anagrafica"), api("/api/tickets"), api("/api/comunicazioni"), api("/api/caricamenti"),
+    api("/api/ordini")]);
+  D = {gara, ric, wi, appr, alerts, comp, led, pvs, anag, tck, com, caric, runtimeOrdini: ordini};
+  try { D.ai = await api("/api/compilazione_ai"); } catch (e) { D.ai = null; }
+  renderTutto();
+}
 
-  // ----- panoramica -----
-  document.getElementById("pan-kpi").innerHTML =
-    kpiCard("Contratto attivo", "v" + gara.contratto_attivo, "dal 01/06 (effective dating)") +
+function renderTutto() {
+  const {gara, ric, wi, appr, alerts, comp, pvs, anag, tck, com, caric} = D;
+  const tckAperti = tck.filter(t => t.stato === "aperto").length;
+  const apprAttesa = appr.filter(a => a.stato === "in_attesa").length;
+  const alertAttivi = alerts.filter(a => a.stato !== "risolto").length;
+  const setBadge = (id, n) => { $(id).style.display = n ? "" : "none"; $(id).textContent = n; };
+  setBadge("b-tck", tckAperti); setBadge("b-appr", apprAttesa); setBadge("b-alert", alertAttivi);
+
+  /* --- panoramica --- */
+  $("p-contratto").textContent = `contratto v${gara.contratto_attivo} attivo`;
+  $("p-kpi").innerHTML =
     kpiCard("Punti vendita", pvs.length, "3 cluster") +
-    kpiCard("Riconciliazione", `${ric.allineati}/${ric.pv_totali}`, ric.divergenze + " divergenze trovate") +
-    kpiCard("Alert aperti", alerts.length, "quarantena dati");
-  document.getElementById("pan-versioni").innerHTML = gara.versioni_contratto.map(v =>
+    kpiCard("Riconciliazione", `${ric.allineati}/${ric.pv_totali}`, ric.divergenze + " divergenze") +
+    kpiCard("Ticket aperti", tckAperti, "contact center") +
+    kpiCard("Batch in attesa", apprAttesa, "approvazioni HITL") +
+    kpiCard("Alert attivi", alertAttivi, "qualità dati");
+  const batchMesi = appr.map(a => ({nome: a.batch.replace("Credito ", ""), punti: a.punti, stato: a.stato}));
+  const maxB = Math.max(...batchMesi.map(b => b.punti));
+  $("p-mesi").innerHTML = batchMesi.map(b =>
+    `<div class="barh"><span>${b.nome.split(" (")[0]}</span>
+      <span class="traccia"><div style="width:${Math.round(100*b.punti/maxB)}%${b.stato!=="approvato"?";background:linear-gradient(90deg,#b7791f,#ffb84d)":""}"></div></span>
+      <span class="valore num">${fmt(b.punti)}</span></div>`).join("");
+  const attivita = [
+    ...tck.map(t => ({ts: t.ts, txt: `🎧 ${t.id} · ${t.pv}: «${t.oggetto}» (${t.stato})`})),
+    ...(D.runtimeOrdini || []).map(o => ({ts: o.ts, txt: `🎁 ${o.id} · ${o.pv}: ${o.premio} (−${fmt(o.punti)} pt)`})),
+    ...com.filter(c => c.runtime).map(c => ({ts: c.data, txt: `📣 Comunicazione: «${c.titolo}»`})),
+  ].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 7);
+  $("p-attivita").innerHTML = attivita.length
+    ? attivita.map(a => `<div class="bk"><span class="small">${a.txt}</span>
+        <span class="muted small" style="white-space:nowrap">${a.ts}</span></div>`).join("")
+    : '<div class="vuoto">nessuna attività runtime — prova a ordinare un premio dal frontend</div>';
+
+  /* --- gare --- */
+  $("g-giorni").textContent = gara.giorni_rimanenti + " giorni alla fine";
+  $("g-periodo").textContent = `Periodo ${gara.periodo} · ${pvs.length} PV aderenti · valorizzazione ${gara.tasso_eur_per_punto} €/punto`;
+  $("g-versioni").innerHTML = gara.versioni_contratto.map(v =>
     `<div class="versione"><b>v${v.v}</b> — valida dal ${v.valido_dal} · approvata il ${v.approvato_il}
      ${v.changelog ? '<div class="small muted">' + v.changelog.join(" · ") + "</div>" : ""}</div>`).join("");
 
-  // ----- compilazione -----
+  /* --- compilazione --- */
   const s = comp.statistiche;
-  document.getElementById("comp-meta").textContent =
-    `${comp.documento_fonte} (${comp.revisione_fonte}) · compilato il ${comp.data_compilazione} · ` +
-    `approvato da ${comp.approvato_da} il ${comp.approvato_il}`;
-  document.getElementById("comp-kpi").innerHTML =
+  $("comp-meta").textContent =
+    `${comp.documento_fonte} (${comp.revisione_fonte}) · compilato il ${comp.data_compilazione} · approvato da ${comp.approvato_da} il ${comp.approvato_il}`;
+  $("comp-kpi").innerHTML =
     kpiCard("Clausole analizzate", s.clausole_analizzate, "") +
     kpiCard("Interpretate auto", s.interpretate_automaticamente, "confidenza ≥ soglia") +
-    kpiCard("Escalation a umano", s.escalation_verifica_umana, "ambiguità bloccanti, poi risolte");
-  document.getElementById("comp-clausole").innerHTML = comp.clausole.map(c => {
+    kpiCard("Escalation a umano", s.escalation_verifica_umana, "ambiguità bloccanti, risolte");
+  if (D.ai && D.ai.esecuzione) {
+    const cv = D.ai.confronto_v1 || {};
+    const esc = (D.ai.clausole || []).filter(c => c.stato === "da_verificare" || c.confidenza < (D.ai.soglia_confidenza || .8));
+    $("comp-ai").innerHTML = `
+      <div class="card" style="border-left:4px solid var(--viola)">
+        <b>🤖 Compilazione AI reale eseguita</b>
+        <span class="chip viola">${D.ai.esecuzione.provider} · ${D.ai.esecuzione.modello}</span>
+        <p class="small" style="margin-top:6px">${D.ai.esecuzione.durata_s}s ·
+          auto-verifica vs contratto approvato: <b>${cv.conformi ?? "?"}/${cv.totale ?? "?"} parametri conformi</b> ·
+          escalation a umano: <b>${esc.length}</b></p>
+        ${esc.map(c => `<p class="small">⚠ <b>${c.articolo}</b> (conf. ${Math.round((c.confidenza||0)*100)}%):
+          ${c.motivo_escalation || c.interpretazione}</p>`).join("")}
+        <p class="small muted">Rilanciala con <code>./run_demo.sh --ai</code> — il contratto proposto non
+        sostituisce il v1 approvato finché un umano non firma.</p></div>`;
+  }
+  $("comp-clausole").innerHTML = comp.clausole.map(c => {
     const colore = c.confidenza >= 0.85 ? "var(--ok)" : c.confidenza >= 0.7 ? "var(--warn)" : "var(--ko)";
     return `<div class="clausola">
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
         <b>${c.id} · ${c.articolo}</b>
         <span class="conf-bar"><span style="display:block;height:100%;width:${Math.round(c.confidenza*100)}%;background:${colore}"></span></span>
         <span class="small muted">confidenza ${(c.confidenza*100).toFixed(0)}%</span>
-        ${c.stato === "auto" ? '<span class="chip ok">auto</span>'
-                             : '<span class="chip warn">verificata da umano</span>'}
-      </div>
+        ${c.stato === "auto" ? '<span class="chip ok">auto</span>' : '<span class="chip warn">verificata da umano</span>'}</div>
       <div class="small muted" style="margin:8px 0 4px">«${c.testo_estratto}»</div>
       <div class="small"><b>Interpretazione:</b> ${c.interpretazione}</div>
-      ${c.escalation ? `<div class="escalation">⚠️ <b>${c.escalation.motivo}</b><br>
-        ✔ ${c.escalation.risoluzione}<br>
-        <span class="muted">${c.escalation.fonte_risoluzione} — verificato da ${c.escalation.verificato_da}
-        il ${c.escalation.verificato_il}</span></div>` : ""}
+      ${c.escalation ? `<div class="escalation">⚠️ <b>${c.escalation.motivo}</b><br>✔ ${c.escalation.risoluzione}<br>
+        <span class="muted">${c.escalation.fonte_risoluzione} — ${c.escalation.verificato_da}, ${c.escalation.verificato_il}</span></div>` : ""}
     </div>`;
   }).join("");
 
-  // ----- compilazione AI reale (banner, solo se eseguita) -----
-  try {
-    const ai = await api("/api/compilazione_ai");
-    if (ai && ai.esecuzione) {
-      const cv = ai.confronto_v1 || {};
-      const diffs = (cv.righe || []).filter(r => r.esito !== "OK");
-      const esc = (ai.clausole || []).filter(c => c.stato === "da_verificare" || c.confidenza < (ai.soglia_confidenza || .8));
-      document.getElementById("comp-ai").innerHTML = `
-        <div class="card" style="border-left:4px solid var(--viola); margin-bottom:16px">
-          <b>🤖 Compilazione AI reale eseguita</b>
-          <span class="chip viola">${ai.esecuzione.provider} · ${ai.esecuzione.modello}</span>
-          <p class="small" style="margin-top:6px">${ai.esecuzione.durata_s}s ·
-            ${ai.esecuzione.token_input ?? "?"} token in / ${ai.esecuzione.token_output ?? "?"} out ·
-            auto-verifica vs contratto approvato: <b>${cv.conformi ?? "?"}/${cv.totale ?? "?"} parametri conformi</b> ·
-            escalation a umano: <b>${esc.length}</b></p>
-          ${esc.map(c => `<p class="small">⚠ <b>${c.articolo}</b> (conf. ${Math.round((c.confidenza || 0) * 100)}%):
-            ${c.motivo_escalation || c.interpretazione}</p>`).join("")}
-          ${diffs.length ? `<p class="small">Parametri difformi: <b>${diffs.map(d => d.parametro).join(", ")}</b></p>` : ""}
-          <p class="small muted">Il contratto proposto dall'AI è in <code>mockup/01_contratto/compilato_ai/</code> —
-          non sostituisce il v1 approvato finché un umano non firma (HITL).</p>
-        </div>`;
-    }
-  } catch (e) { /* compilazione AI non eseguita: nessun banner */ }
+  /* --- caricamenti --- */
+  const esitoChip = e => e === "ok" ? '<span class="chip ok">ok</span>'
+    : e === "con_anomalie" ? '<span class="chip warn">con anomalie</span>'
+    : '<span class="chip ko">respinto</span>';
+  $("caric-storico").innerHTML = caric.map(c =>
+    `<tr><td><b>${c.file}</b></td><td class="muted">${c.ts}</td>
+      <td style="text-align:right" class="num">${c.righe}</td><td>${esitoChip(c.esito)}</td>
+      <td class="small muted">${c.nota || (c.anomalie || []).join("; ") || (c.errori || []).join("; ") || "—"}</td></tr>`).join("");
 
-  // ----- riconciliazione -----
-  document.getElementById("ric-kpi").innerHTML =
+  /* --- riconciliazione --- */
+  $("ric-kpi").innerHTML =
     kpiCard("PV confrontati", ric.pv_totali, ric.periodi.join(" + ")) +
     kpiCard("Allineati", ric.allineati, "Δ = 0") +
     kpiCard("Divergenze", ric.divergenze, "con diagnosi automatica");
-  document.getElementById("ric-righe").innerHTML = ric.righe.map(r =>
+  $("ric-righe").innerHTML = ric.righe.map(r =>
     `<tr class="${r.esito === "KO" ? "evidenzia" : ""}">
       <td>${r.pv}<div class="small muted">${r.insegna}</div></td>
-      <td style="text-align:right">${fmt(r.punti_regolo)}</td>
-      <td style="text-align:right">${fmt(r.punti_piattaforma)}</td>
-      <td style="text-align:right" class="${r.delta ? "punti-neg" : ""}">${r.delta > 0 ? "+" : ""}${fmt(r.delta)}</td>
+      <td style="text-align:right" class="num">${fmt(r.punti_regolo)}</td>
+      <td style="text-align:right" class="num">${fmt(r.punti_piattaforma)}</td>
+      <td style="text-align:right" class="num ${r.delta ? "punti-neg" : ""}">${r.delta > 0 ? "+" : ""}${fmt(r.delta)}</td>
       <td>${r.esito === "OK" ? '<span class="chip ok">OK</span>' : '<span class="chip ko">KO</span>'}
       ${r.diagnosi ? '<div class="small" style="max-width:330px;margin-top:4px">🔎 ' + r.diagnosi + "</div>" : ""}</td></tr>`).join("");
 
-  // ----- what-if -----
-  document.getElementById("wi-descr").textContent = wi.descrizione;
-  document.getElementById("wi-kpi").innerHTML =
+  /* --- what-if --- */
+  $("wi-descr").textContent = wi.descrizione;
+  $("wi-kpi").innerHTML =
     kpiCard("Δ punti totale", "+" + fmt(wi.delta_punti_totale), "v2 retroattiva vs corso effettivo") +
     kpiCard("Δ budget premi", "+" + eur(wi.delta_budget_eur), "a 0,25 €/punto") +
     kpiCard("PV impattati", wi.pv_impattati, "su " + wi.righe.length);
-  document.getElementById("wi-righe").innerHTML = wi.righe.slice(0, 12).map(r =>
+  $("wi-righe").innerHTML = wi.righe.slice(0, 12).map(r =>
     `<tr><td>${r.pv}<div class="small muted">${r.insegna}</div></td><td>${r.cluster}</td>
-      <td style="text-align:right">${fmt(r.punti_v1)}</td>
-      <td style="text-align:right">${fmt(r.punti_v2_retro)}</td>
-      <td style="text-align:right" class="punti-pos">+${fmt(r.delta)}</td></tr>`).join("");
+      <td style="text-align:right" class="num">${fmt(r.punti_v1)}</td>
+      <td style="text-align:right" class="num">${fmt(r.punti_v2_retro)}</td>
+      <td style="text-align:right" class="punti-pos num">+${fmt(r.delta)}</td></tr>`).join("");
 
-  // ----- approvazioni -----
-  document.getElementById("appr-lista").innerHTML = appr.map((a, i) => `
+  /* --- approvazioni --- */
+  $("appr-lista").innerHTML = appr.map(a => `
     <div class="card"><div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap">
       <div style="flex:1"><b>${a.batch}</b>
         <div class="small muted">${fmt(a.punti)} punti${a.valore_eur ? " · " + eur(a.valore_eur) : ""}
-        ${a.pv_coinvolti ? " · " + a.pv_coinvolti + " PV" : ""}${a.nota ? " · " + a.nota : ""}</div>
+          ${a.pv_coinvolti ? " · " + a.pv_coinvolti + " PV" : ""}${a.nota ? " · " + a.nota : ""}</div>
         ${a.approvato_da ? `<div class="small muted">approvato da ${a.approvato_da} il ${a.approvato_il}</div>` : ""}</div>
-      ${a.stato === "approvato"
-        ? '<span class="chip ok">approvato</span>'
-        : `<span class="chip warn" id="appr-chip-${i}">in attesa</span>
-           <button class="primario" id="appr-btn-${i}"
-             onclick="document.getElementById('appr-chip-${i}').outerHTML='<span class=&quot;chip ok&quot;>approvato (demo)</span>';this.disabled=true">
-             Approva batch</button>`}
+      ${a.stato === "approvato" ? '<span class="chip ok">approvato</span>'
+        : `<span class="chip warn">in attesa</span>
+           <button class="primario" onclick="modaleApprova()">Approva batch…</button>`}
     </div></div>`).join("");
 
-  // ----- alert -----
-  document.getElementById("alert-lista").innerHTML = alerts.length ? alerts.map(a => `
-    <div class="card"><b>⚠️ ${a.pv} — periodo ${a.periodo}</b>
-      <span class="chip warn" style="margin-left:8px">${a.stato}</span>
-      <p class="small" style="margin-top:8px">${a.dettaglio}</p></div>`).join("")
-    : '<div class="card muted">Nessun alert aperto.</div>';
+  /* --- anagrafica --- */
+  renderAnagrafica();
 
-  // ----- ledger -----
-  const sel = document.getElementById("led-filtro");
-  sel.innerHTML += pvs.map(p => `<option value="${p.codice}">${p.codice} — ${p.insegna}</option>`).join("");
-  const renderLedger = d => {
-    document.getElementById("led-tot").textContent = `(${d.totale} eventi, mostro i più recenti)`;
-    document.getElementById("led-righe").innerHTML = d.eventi.map(e =>
-      `<tr><td class="muted small">${e.id}</td><td class="muted">${e.ts.slice(0,10)}</td><td>${e.pv}</td>
-        <td class="small">${e.descrizione}</td>
-        <td style="text-align:right" class="${e.punti < 0 ? "punti-neg" : "punti-pos"}">${e.punti > 0 ? "+" : ""}${fmt(e.punti)}</td>
-        <td class="muted small">v${e.contratto_v}</td>
-        <td>${e.stato === "contabilizzato" ? '<span class="chip ok">contab.</span>' : '<span class="chip warn">in appr.</span>'}</td></tr>`).join("");
-  };
-  renderLedger(led);
-  sel.onchange = async () => renderLedger(await api("/api/ledger?limit=100" + (sel.value ? "&pv=" + sel.value : "")));
+  /* --- assistenza --- */
+  const statiT = {aperto:"warn", in_lavorazione:"blu", risposto:"ok"};
+  $("tck-lista").innerHTML = tck.length ? tck.map(t => `
+    <div class="card">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+        <b>${t.oggetto}</b><span class="chip ${statiT[t.stato]}">${t.stato.replace("_"," ")}</span>
+        <span class="chip">${t.categoria}</span>
+        <span class="muted small">${t.id} · ${t.pv} · ${t.ts}</span></div>
+      ${t.riferimento ? `<div class="small muted" style="margin-top:4px">rif: ${t.riferimento}</div>` : ""}
+      <p class="small" style="margin-top:6px">${t.messaggio}</p>
+      ${t.risposte.map(r => `<div class="small" style="margin-top:8px; padding:9px 12px; background:#f0f6ff; border-radius:10px">
+        <b>${r.da}</b> <span class="muted">· ${r.ts}</span><br>${r.testo}</div>`).join("")}
+      ${t.stato !== "risposto" ? `
+        <div style="display:flex; gap:8px; margin-top:10px">
+          <input id="r-${t.id}" placeholder="Scrivi la risposta al PV…" style="flex:1">
+          <button class="primario" onclick="rispondi('${t.id}')">Rispondi e chiudi</button></div>` : ""}
+    </div>`).join("") : '<div class="card vuoto">Nessun ticket in coda.</div>';
 
-  vai(location.hash);
+  /* --- comunicazioni --- */
+  $("com-lista").innerHTML = com.map(c => `
+    <div class="bk" style="flex-direction:column; align-items:flex-start">
+      <b>${c.titolo} ${c.runtime ? '<span class="chip viola">runtime</span>' : ""}
+        <span class="muted small" style="font-weight:400">· ${c.data}</span></b>
+      <span class="small">${c.testo}</span></div>`).join("");
+
+  /* --- alert --- */
+  $("alert-lista").innerHTML = alerts.length ? alerts.map(a => `
+    <div class="card"><div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+      <b>⚠️ ${a.pv} — periodo ${a.periodo}</b>
+      <span class="chip ${a.stato === "risolto" ? "ok" : "warn"}">${a.stato}</span>
+      <div class="spacer"></div>
+      ${a.stato !== "risolto" ? `<button onclick="risolviAlert('${a.pv}')">Segna come verificato</button>` : ""}</div>
+      <p class="small" style="margin-top:8px">${a.dettaglio}</p>
+      ${a.risoluzione ? `<p class="small muted">✔ ${a.risoluzione.nota} — ${a.risoluzione.ts}.
+        Al prossimo run del motore la riga rientra nel calcolo.</p>` : ""}
+    </div>`).join("") : '<div class="card vuoto">Nessun alert.</div>';
+
+  /* --- ledger --- */
+  const sel = $("led-filtro");
+  if (sel.options.length <= 1)
+    sel.innerHTML += pvs.map(p => `<option value="${p.codice}">${p.codice} — ${p.insegna}</option>`).join("");
+  renderLedger(D.led);
 }
-init();
+
+/* ---------- anagrafica ---------- */
+function renderAnagrafica() {
+  const q = ($("ana-cerca").value || "").toLowerCase();
+  const righe = D.anag.filter(p => !q || `${p.codice} ${p.insegna} ${p.citta} ${p.regione}`.toLowerCase().includes(q));
+  $("ana-righe").innerHTML = righe.map(p => `
+    <tr><td><b>${p.codice}</b><div class="small muted">${p.insegna}</div></td>
+      <td>${p.citta} (${p.provincia})<div class="small muted">${p.regione}</div></td>
+      <td><span class="chip ${p.cluster === "GOLD" ? "warn" : p.cluster === "SILVER" ? "" : "blu"}">${p.cluster}</span></td>
+      <td style="text-align:right" class="num">${p.media_2025}</td>
+      <td style="text-align:right" class="num">${fmt(p.saldo_disponibile)}</td>
+      <td>${p.posizione_classifica}°</td>
+      <td><span class="pallino" style="background:var(--ok)"></span>${p.stato_pv}</td>
+      <td><button class="fantasma small" onclick="modalePV('${p.codice}')">modifica</button></td></tr>`).join("");
+}
+$("ana-cerca").oninput = renderAnagrafica;
+
+function modalePV(codice) {
+  const p = D.anag.find(x => x.codice === codice);
+  apriModale(`<h3>Modifica ${p.codice}</h3>
+    <label class="campo">Insegna</label><input style="width:100%" value="${p.insegna}">
+    <label class="campo">Email referente</label><input style="width:100%" value="${p.email}">
+    <label class="campo">Cluster</label>
+    <select style="width:100%"><option ${p.cluster==="GOLD"?"selected":""}>GOLD</option>
+      <option ${p.cluster==="SILVER"?"selected":""}>SILVER</option>
+      <option ${p.cluster==="BRONZE"?"selected":""}>BRONZE</option></select>
+    <p class="small muted" style="margin-top:10px">⚠ Demo: il salvataggio anagrafica (e il write-back
+    verso la piattaforma) è in scope Fase 2. Il cluster, da regolamento, non è modificabile in corso
+    di gara (art. 4.2).</p>
+    <div class="piede"><button class="fantasma" onclick="chiudiModale()">Chiudi</button>
+    <button class="primario" onclick="chiudiModale();toast('Demo: scrittura anagrafica in Fase 2','')">Salva (demo)</button></div>`);
+}
+function modaleNuovoPV() {
+  apriModale(`<h3>Nuovo punto vendita</h3>
+    <label class="campo">Codice</label><input style="width:100%" placeholder="SE-XX-000">
+    <label class="campo">Insegna</label><input style="width:100%" placeholder="Spazio Enel …">
+    <label class="campo">Email referente</label><input style="width:100%" placeholder="…@spazioenel.example">
+    <p class="small muted" style="margin-top:10px">⚠ Demo: l'inserimento reale richiede l'adesione
+    formale (art. 2) e l'assegnazione cluster su media 2025 (art. 4.1).</p>
+    <div class="piede"><button class="fantasma" onclick="chiudiModale()">Chiudi</button>
+    <button class="primario" onclick="chiudiModale();toast('Demo: inserimento PV in Fase 2','')">Crea (demo)</button></div>`);
+}
+function modaleNuovaGara() {
+  apriModale(`<h3>Nuova gara da regolamento</h3>
+    <p class="small">Il flusso reale (Fase 1): carichi il regolamento → il <b>Compilatore AI</b> produce
+    il Contratto di Gara con confidenze → le clausole ambigue vengono escalate → approvi → la gara è
+    operativa, frontend incluso.</p>
+    <p class="small" style="margin-top:8px">Nel mockup puoi provare il compilatore reale da terminale:</p>
+    <pre style="background:#101630;color:#dde4ff;padding:10px 12px;border-radius:10px;font-size:12px">cd ~/REGOLO && ./run_demo.sh --ai</pre>
+    <div class="piede"><button class="primario" onclick="chiudiModale()">Ok</button></div>`);
+}
+
+/* ---------- azioni reali ---------- */
+function modaleApprova() {
+  const a = D.appr.find(x => x.stato === "in_attesa");
+  apriModale(`<h3>Approvare il batch?</h3>
+    <p class="small muted">Firma HITL: gli eventi passano a «contabilizzato» e i saldi dei PV si
+    aggiornano subito sul frontend.</p>
+    <div class="bk"><span>Batch</span><b>${a.batch}</b></div>
+    <div class="bk"><span>Punti</span><b class="num">${fmt(a.punti)}</b></div>
+    <div class="bk"><span>Controvalore</span><b>${eur(a.valore_eur || a.punti * 0.25)}</b></div>
+    ${a.nota ? `<div class="bk"><span>Nota</span><span class="small">${a.nota}</span></div>` : ""}
+    <div class="piede"><button class="fantasma" onclick="chiudiModale()">Annulla</button>
+    <button class="primario" onclick="approvaGiugno()">Firma e contabilizza</button></div>`);
+}
+async function approvaGiugno() {
+  try {
+    const r = await apiPost("/api/approvazioni/giugno/approva", {approvato_da: "b.giorgio"});
+    chiudiModale(); toast(`Batch approvato: ${fmt(r.punti)} punti contabilizzati ✓`, "ok");
+    await carica();
+  } catch (e) { toast(e.detail || "errore", "ko"); chiudiModale(); }
+}
+async function rispondi(id) {
+  const testo = $("r-" + id).value.trim();
+  if (!testo) return toast("Scrivi una risposta", "ko");
+  try { await apiPost(`/api/tickets/${id}/rispondi`, {testo, chiudi: true});
+        toast("Risposta inviata al PV ✓", "ok"); await carica(); }
+  catch (e) { toast(e.detail || "errore", "ko"); }
+}
+async function risolviAlert(pv) {
+  try { await apiPost(`/api/alerts/${pv}/risolvi`, {nota: "verificato col Promotore"});
+        toast("Alert risolto ✓", "ok"); await carica(); }
+  catch (e) { toast(e.detail || "errore", "ko"); }
+}
+$("com-invia").onclick = async () => {
+  const titolo = $("com-titolo").value.trim(), testo = $("com-testo").value.trim();
+  if (!titolo || !testo) return toast("Titolo e testo sono obbligatori", "ko");
+  try { await apiPost("/api/comunicazioni", {titolo, testo});
+        $("com-titolo").value = $("com-testo").value = "";
+        toast("Comunicazione pubblicata: ora è visibile ai PV ✓", "ok"); await carica(); }
+  catch (e) { toast(e.detail || "errore", "ko"); }
+};
+$("btn-reset").onclick = async () => {
+  if (!confirm("Riportare la demo allo stato iniziale? (ordini, ticket, approvazioni runtime)")) return;
+  await apiPost("/api/reset_demo"); toast("Demo azzerata ✓", "ok"); await carica();
+};
+
+/* ---------- upload con validazione ---------- */
+const dz = $("dropzone");
+dz.onclick = () => $("file-input").click();
+dz.ondragover = e => { e.preventDefault(); dz.classList.add("sopra"); };
+dz.ondragleave = () => dz.classList.remove("sopra");
+dz.ondrop = e => { e.preventDefault(); dz.classList.remove("sopra");
+                   if (e.dataTransfer.files[0]) validaFile(e.dataTransfer.files[0]); };
+$("file-input").onchange = e => { if (e.target.files[0]) validaFile(e.target.files[0]); };
+
+async function validaFile(file) {
+  $("caric-report").innerHTML = '<div class="card"><span class="skel">validazione in corso…</span></div>';
+  const fd = new FormData(); fd.append("file", file);
+  const r = await fetch("/api/caricamenti", {method: "POST", body: fd});
+  const rep = await r.json();
+  if (!r.ok) { $("caric-report").innerHTML = ""; return toast(rep.detail || "errore upload", "ko"); }
+  const colore = rep.esito === "ok" ? "var(--ok)" : rep.esito === "con_anomalie" ? "var(--warn)" : "var(--ko)";
+  $("caric-report").innerHTML = `
+    <div class="card" style="border-left:4px solid ${colore}">
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+        <b>Report validazione — ${rep.file}</b>
+        <span class="chip ${rep.esito === "ok" ? "ok" : rep.esito === "con_anomalie" ? "warn" : "ko"}">${rep.esito.replace("_"," ")}</span></div>
+      <div class="riga" style="margin-top:10px">
+        <div class="card flex1" style="box-shadow:none;background:#f8fafe;margin:0"><div class="kpi-label">Righe</div><div class="kpi-valore num" style="font-size:22px">${rep.righe}</div></div>
+        <div class="card flex1" style="box-shadow:none;background:#f8fafe;margin:0"><div class="kpi-label">PV coinvolti</div><div class="kpi-valore num" style="font-size:22px">${rep.pv_coinvolti}</div></div>
+        <div class="card flex1" style="box-shadow:none;background:#f8fafe;margin:0"><div class="kpi-label">Attivazioni commodity</div><div class="kpi-valore num" style="font-size:22px">${fmt(rep.totale_attivazioni)}</div></div>
+      </div>
+      ${rep.errori.length ? "<p class='small' style='margin-top:10px'><b>Errori:</b><br>" + rep.errori.map(e => "✗ " + e).join("<br>") + "</p>" : ""}
+      ${rep.anomalie.length ? "<p class='small' style='margin-top:10px'><b>Anomalie (quarantena):</b><br>" + rep.anomalie.map(a => "⚠ " + a).join("<br>") + "</p>" : ""}
+      <p class="small muted" style="margin-top:10px">${rep.nota}</p>
+    </div>`;
+  toast("Validazione completata", rep.esito === "respinto" ? "ko" : "ok");
+  D.caric = await api("/api/caricamenti"); renderTutto(); vai("#caricamenti");
+}
+
+/* ---------- ledger ---------- */
+function renderLedger(d) {
+  $("led-tot").textContent = `(${d.totale} eventi del motore, mostro i più recenti)`;
+  $("led-righe").innerHTML = d.eventi.map(e =>
+    `<tr><td class="muted small">${e.id}</td><td class="muted">${e.ts.slice(0,10)}</td><td>${e.pv}</td>
+      <td class="small">${e.descrizione}</td>
+      <td style="text-align:right" class="num ${e.punti < 0 ? "punti-neg" : "punti-pos"}">${e.punti > 0 ? "+" : ""}${fmt(e.punti)}</td>
+      <td class="muted small">v${e.contratto_v}</td>
+      <td>${e.stato === "contabilizzato" ? '<span class="chip ok">contab.</span>' : '<span class="chip warn">in appr.</span>'}</td></tr>`).join("");
+}
+$("led-filtro").onchange = async () => {
+  const v = $("led-filtro").value;
+  renderLedger(await api("/api/ledger?limit=100" + (v ? "&pv=" + v : "")));
+};
+
+/* ---------- avvio ---------- */
+(async () => { await carica(); vai(location.hash); })();
 </script>
 </body>
 </html>

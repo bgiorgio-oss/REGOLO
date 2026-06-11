@@ -3,180 +3,423 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spazio alla Meta 2026 — il mio punto vendita</title>
+<title>Spazio alla Meta 2026 — Area punto vendita</title>
 <link rel="stylesheet" href="/static/style.css">
-<style>
-  header.testata { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:18px 0 20px; }
-  .logo-gara { font-size:24px; font-weight:800; letter-spacing:-.02em; }
-  .logo-gara span { background:var(--arcobaleno); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .spacer { flex:1; }
-  .mese-card { flex:1; min-width:150px; border:1px solid var(--bordo); border-radius:12px; padding:12px 14px; }
-  .bk { display:flex; justify-content:space-between; font-size:13.5px; padding:6px 0; border-bottom:1px dashed var(--bordo); }
-  .bk:last-child { border-bottom:none; }
-</style>
 </head>
 <body>
 <div class="barra-brand"></div>
+
+<div class="topbar"><div class="topbar-int">
+  <div class="logo-gara">SPAZIO ALLA <span>META</span> 2026</div>
+  <nav class="tabs" id="tabs">
+    <a href="#dashboard" class="attivo">Dashboard</a>
+    <a href="#catalogo">Catalogo</a>
+    <a href="#ordini">I miei ordini</a>
+    <a href="#movimenti">Movimenti</a>
+    <a href="#assistenza">Assistenza<span class="badge" id="badge-tck" style="display:none"></span></a>
+    <a href="#news">News</a>
+  </nav>
+  <div class="spacer"></div>
+  <select id="sel-pv" title="Cambia punto vendita (demo)"></select>
+</div></div>
+
 <div class="contenitore">
 
-  <header class="testata">
-    <div>
-      <div class="logo-gara">SPAZIO ALLA <span>META</span> 2026</div>
-      <div class="muted small" id="sotto-titolo">—</div>
-    </div>
-    <div class="spacer"></div>
-    <span class="chip blu" id="giorni">—</span>
-    <select id="sel-pv" title="Cambia punto vendita (demo)"></select>
-  </header>
+<!-- ════════ DASHBOARD ════════ -->
+<section id="dashboard" class="vista attiva">
+  <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:6px 0 16px">
+    <h1 id="dash-titolo">—</h1>
+    <span class="chip blu" id="dash-giorni">—</span>
+    <span class="chip" id="dash-cluster">—</span>
+  </div>
 
   <div class="riga" style="margin-bottom:16px">
-    <div class="card flex1"><div class="kpi-label">Saldo punti</div>
-      <div class="kpi-valore" id="saldo">—</div>
-      <div class="kpi-sub" id="saldo-sub">contabilizzati</div></div>
-    <div class="card flex1"><div class="kpi-label">Credito maturato</div>
-      <div class="kpi-valore" id="credito">—</div>
-      <div class="kpi-sub">spendibile a catalogo</div></div>
+    <div class="card flex1 hero"><div class="kpi-label">Saldo disponibile</div>
+      <div class="kpi-valore num" id="d-saldo">—</div>
+      <div class="kpi-sub" id="d-saldo-sub">—</div></div>
+    <div class="card flex1"><div class="kpi-label">Credito spendibile</div>
+      <div class="kpi-valore num" id="d-credito">—</div>
+      <div class="kpi-sub">a catalogo · 0,25 €/punto</div></div>
     <div class="card flex1"><div class="kpi-label">In approvazione</div>
-      <div class="kpi-valore" id="in-appr">—</div>
-      <div class="kpi-sub" id="in-appr-sub">mese corrente, in validazione</div></div>
-    <div class="card flex1"><div class="kpi-label">Classifica</div>
-      <div class="kpi-valore" id="posizione">—</div>
-      <div class="kpi-sub" id="posizione-sub">—</div></div>
+      <div class="kpi-valore num" id="d-appr">—</div>
+      <div class="kpi-sub" id="d-appr-sub">mese corrente, in validazione</div></div>
+    <div class="card flex1"><div class="kpi-label">Classifica cluster</div>
+      <div class="kpi-valore" id="d-pos">—</div>
+      <div class="kpi-sub" id="d-pos-sub">—</div></div>
   </div>
 
   <div class="card">
-    <h2>Il mio andamento mensile</h2>
-    <div class="riga" id="mesi"></div>
+    <h2>Andamento mensile <span class="muted small" id="d-mese-nota"></span></h2>
+    <div class="riga" id="d-mesi"></div>
   </div>
 
   <div class="riga">
-    <div class="card flex1" style="min-width:320px">
-      <h2>Da dove arrivano i miei punti</h2>
-      <div id="breakdown"></div>
+    <div class="card flex1" style="min-width:330px">
+      <h2>Da dove arrivano i punti</h2>
+      <div id="d-breakdown"></div>
     </div>
-    <div class="card flex1" style="min-width:320px">
-      <h2 id="titolo-classifica">Classifica cluster</h2>
+    <div class="card flex1" style="min-width:330px">
+      <h2 id="d-cl-titolo">Classifica</h2>
       <table><thead><tr><th>#</th><th>Punto vendita</th><th style="text-align:right">Punti</th><th style="text-align:right">Indice</th></tr></thead>
-      <tbody id="classifica"></tbody></table>
-      <p class="small muted" style="margin-top:8px">Indice = punti / (target mensile × mesi conclusi) — art. 7 del regolamento.
-      Premi finali: 1° +5.000 · 2° +3.000 · 3° +1.500 punti.</p>
+      <tbody id="d-classifica"></tbody></table>
+      <p class="small muted" style="margin-top:8px">Indice = punti / (target × mesi conclusi) — art. 7.
+      Premi finali per cluster: 🥇 +5.000 · 🥈 +3.000 · 🥉 +1.500 punti.</p>
     </div>
   </div>
 
   <div class="card">
-    <h2>Catalogo premi <span class="muted small">(estratto)</span></h2>
-    <div class="griglia-catalogo" id="catalogo"></div>
+    <div style="display:flex; align-items:center"><h2 style="margin-bottom:0">Ultime news</h2>
+      <div class="spacer"></div><a href="#news" class="small">tutte →</a></div>
+    <div id="d-news" style="margin-top:8px"></div>
   </div>
+</section>
 
+<!-- ════════ CATALOGO ════════ -->
+<section id="catalogo" class="vista">
+  <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:6px 0 14px">
+    <h1>Catalogo premi</h1><div class="spacer"></div>
+    <span class="chip ok" id="c-saldo">—</span>
+  </div>
+  <div class="filtri" id="c-filtri"></div>
+  <div class="griglia-catalogo" id="c-griglia"></div>
+  <p class="small muted" style="margin-top:14px">I premi richiesti vengono scalati subito dal saldo
+  disponibile e tracciati come movimenti di spesa sul ledger. Consegna gestita dal contact center.</p>
+</section>
+
+<!-- ════════ ORDINI ════════ -->
+<section id="ordini" class="vista">
+  <h1 style="margin:6px 0 14px">I miei ordini</h1>
   <div class="card">
-    <h2>I miei movimenti <span class="muted small">— ogni punto è tracciato</span></h2>
-    <table><thead><tr><th>Data</th><th>Periodo</th><th>Descrizione</th><th style="text-align:right">Punti</th><th>Stato</th></tr></thead>
-    <tbody id="movimenti"></tbody></table>
+    <table><thead><tr><th>Ordine</th><th>Data</th><th>Premio</th>
+      <th style="text-align:right">Punti</th><th>Stato</th></tr></thead>
+      <tbody id="o-righe"></tbody></table>
+    <div class="vuoto" id="o-vuoto" style="display:none">Nessun ordine ancora — scegli un premio dal
+      <a href="#catalogo">catalogo</a>.</div>
   </div>
+</section>
 
+<!-- ════════ MOVIMENTI ════════ -->
+<section id="movimenti" class="vista">
+  <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:6px 0 14px">
+    <h1>Movimenti punti</h1><div class="spacer"></div>
+    <select id="m-tipo"><option value="">tutti i tipi</option><option>accredito</option>
+      <option>bonus</option><option>storno</option><option>spesa</option></select>
+    <select id="m-periodo"><option value="">tutti i periodi</option></select>
+    <button class="fantasma" id="m-export">⬇ Esporta CSV</button>
+  </div>
   <div class="card">
-    <h2>Comunicazioni</h2>
-    <div id="comunicazioni"></div>
+    <table><thead><tr><th>Data</th><th>Periodo</th><th>Descrizione</th>
+      <th style="text-align:right">Punti</th><th>Stato</th></tr></thead>
+      <tbody id="m-righe"></tbody></table>
   </div>
+  <p class="small muted">Ogni movimento cita la meccanica e la versione di contratto che l'ha generato:
+  in caso di dubbi puoi aprire una <a href="#assistenza">contestazione</a> entro 30 giorni (art. 9.2).</p>
+</section>
 
-  <div class="footer-demo">
-    Mockup progetto <b>REGOLO</b> — dati interamente fittizi · backend headless su API ·
-    <a href="/backoffice">vai al backoffice →</a>
+<!-- ════════ ASSISTENZA ════════ -->
+<section id="assistenza" class="vista">
+  <h1 style="margin:6px 0 14px">Assistenza & contact center</h1>
+  <div class="riga">
+    <div style="flex:1.2; min-width:330px">
+      <div class="card">
+        <h2>Apri una richiesta</h2>
+        <label class="campo">Categoria</label>
+        <select id="t-categoria" style="width:100%">
+          <option>Contestazione punteggio</option>
+          <option>Premi e catalogo</option>
+          <option>Dati e caricamenti</option>
+          <option>Accesso e profilo</option>
+          <option>Altro</option>
+        </select>
+        <label class="campo">Oggetto</label>
+        <input id="t-oggetto" style="width:100%" placeholder="es. Storno di aprile non riconosciuto">
+        <label class="campo">Riferimento (facoltativo)</label>
+        <input id="t-rif" style="width:100%" placeholder="es. movimento EV00123 o periodo 2026-04">
+        <label class="campo">Messaggio</label>
+        <textarea id="t-msg" placeholder="Descrivi la richiesta…"></textarea>
+        <div style="display:flex; justify-content:flex-end; margin-top:12px">
+          <button class="primario" id="t-invia">Invia richiesta</button>
+        </div>
+      </div>
+      <div class="card faq">
+        <h2>Domande frequenti</h2>
+        <details><summary>Quando viene caricato il credito?</summary>
+          <p>Ogni mese, entro il giorno 10 del mese successivo, dopo la validazione dei dati
+          (art. 8.2). I punti del mese in corso compaiono come «in approvazione».</p></details>
+        <details><summary>Perché vedo uno storno?</summary>
+          <p>Se un contratto viene annullato entro 60 giorni dall'attivazione, i punti
+          corrispondenti vengono stornati, anche in mesi successivi (art. 5.7).</p></details>
+        <details><summary>Come funziona il cap mensile?</summary>
+          <p>I punti da attivazioni commodity hanno un massimale mensile (art. 5.1); dal 1° giugno
+          il cap è stato alzato a 900 punti (regolamento rev. 1). Fibra e prodotti non hanno cap.</p></details>
+        <details><summary>Posso contestare un punteggio?</summary>
+          <p>Sì, entro 30 giorni dalla pubblicazione (art. 9.2): apri una richiesta con categoria
+          «Contestazione punteggio» citando il movimento. Ogni punto è tracciato fino alla clausola
+          del regolamento, quindi la verifica è rapida.</p></details>
+      </div>
+    </div>
+    <div style="flex:1; min-width:330px">
+      <div class="card">
+        <h2>Le mie richieste</h2>
+        <div id="t-lista"></div>
+        <div class="vuoto" id="t-vuoto" style="display:none">Nessuna richiesta aperta.</div>
+      </div>
+    </div>
   </div>
+</section>
+
+<!-- ════════ NEWS ════════ -->
+<section id="news" class="vista">
+  <h1 style="margin:6px 0 14px">News e comunicazioni</h1>
+  <div id="n-lista"></div>
+</section>
+
+<div class="footer-demo">Mockup progetto <b>REGOLO</b> — dati interamente fittizi ·
+  backend headless su API (:8788) · <a href="/backoffice">backoffice →</a></div>
 </div>
 
+<!-- modale + toast -->
+<div class="modale-sfondo" id="modale-sfondo"><div class="modale" id="modale"></div></div>
+<div id="toasts"></div>
+
 <script>
-const MESI_NOMI = {"2026-04":"Aprile","2026-05":"Maggio","2026-06":"Giugno"};
-const MECC_NOMI = {punti_commodity:"Luce & Gas", punti_fibra:"Fibra", punti_fotovoltaico:"Fotovoltaico",
-                   punti_wallbox:"Wallbox", punti_clima:"Clima", bonus_obiettivo_mensile:"Bonus obiettivo",
-                   bonus_tripletta:"Bonus tripletta", storni:"Storni"};
+/* ---------- helper ---------- */
+const $ = id => document.getElementById(id);
 const fmt = n => n.toLocaleString("it-IT");
 const eur = n => n.toLocaleString("it-IT", {style:"currency", currency:"EUR"});
-const api = async p => (await fetch(p)).json();
+const api = async p => { const r = await fetch(p); if (!r.ok) throw (await r.json()); return r.json(); };
+const apiPost = async (p, corpo) => {
+  const r = await fetch(p, {method:"POST", headers:{"Content-Type":"application/json"},
+                            body: corpo ? JSON.stringify(corpo) : "{}"});
+  const d = await r.json(); if (!r.ok) throw d; return d;
+};
+function toast(msg, tipo) {
+  const t = document.createElement("div"); t.className = "toast " + (tipo || "");
+  t.textContent = msg; $("toasts").appendChild(t); setTimeout(() => t.remove(), 4200);
+}
+function apriModale(html) { $("modale").innerHTML = html; $("modale-sfondo").classList.add("aperta"); }
+function chiudiModale() { $("modale-sfondo").classList.remove("aperta"); }
+$("modale-sfondo").onclick = e => { if (e.target.id === "modale-sfondo") chiudiModale(); };
 
-async function caricaPV(codice) {
-  const [gara, pv, classifiche, catalogo, comunicazioni] = await Promise.all([
-    api("/api/gara"), api("/api/pv/" + codice), api("/api/classifiche"),
+const MESI_NOMI = {"2026-04":"Aprile","2026-05":"Maggio","2026-06":"Giugno"};
+const MECC = {punti_commodity:"Luce & Gas", punti_fibra:"Fibra", punti_fotovoltaico:"Fotovoltaico",
+              punti_wallbox:"Wallbox", punti_clima:"Clima", bonus_obiettivo_mensile:"Bonus obiettivo",
+              bonus_tripletta:"Bonus tripletta", storni:"Storni", catalogo:"Premi richiesti"};
+
+/* ---------- stato app ---------- */
+let PV = localStorage.getItem("regolo_pv") || "SE-MI-001";
+let D = {};            // dati correnti {gara, pv, classifiche, catalogo, news}
+let filtroCat = "";
+
+/* ---------- routing ---------- */
+function vai(hash) {
+  const id = (hash || "#dashboard").slice(1);
+  document.querySelectorAll("section.vista").forEach(s => s.classList.remove("attiva"));
+  document.querySelectorAll("#tabs a").forEach(a => a.classList.remove("attivo"));
+  ($(id) || $("dashboard")).classList.add("attiva");
+  const tab = document.querySelector(`#tabs a[href="#${id}"]`); if (tab) tab.classList.add("attivo");
+  window.scrollTo({top:0});
+}
+window.addEventListener("hashchange", () => vai(location.hash));
+
+/* ---------- caricamento ---------- */
+async function carica() {
+  const [gara, pv, classifiche, catalogo, news] = await Promise.all([
+    api("/api/gara"), api("/api/pv/" + PV), api("/api/classifiche"),
     api("/api/catalogo"), api("/api/comunicazioni")]);
+  D = {gara, pv, classifiche, catalogo, news};
+  renderDashboard(); renderCatalogo(); renderOrdini(); renderMovimenti(); renderAssistenza(); renderNews();
+}
 
-  document.getElementById("sotto-titolo").textContent =
-    `${pv.insegna} · cluster ${pv.cluster} · gara ${gara.periodo}`;
-  document.getElementById("giorni").textContent = `${gara.giorni_rimanenti} giorni alla fine`;
-  document.getElementById("saldo").textContent = fmt(pv.saldo_contabilizzato);
-  document.getElementById("credito").textContent = eur(pv.valore_eur);
-  document.getElementById("in-appr").textContent = "+" + fmt(pv.saldo_in_approvazione);
-  document.getElementById("posizione").textContent = pv.posizione_classifica + "°";
-  document.getElementById("posizione-sub").textContent =
-    `su ${pv.dimensione_cluster} PV nel cluster ${pv.cluster}`;
+/* ---------- dashboard ---------- */
+function renderDashboard() {
+  const {gara, pv, classifiche} = D;
+  $("dash-titolo").textContent = pv.insegna;
+  $("dash-giorni").textContent = gara.giorni_rimanenti + " giorni alla fine";
+  $("dash-cluster").textContent = "cluster " + pv.cluster + " · target " + pv.mesi[0].target + "/mese";
+  $("d-saldo").textContent = fmt(pv.saldo_disponibile);
+  $("d-saldo-sub").textContent = pv.spesa_totale
+    ? `${fmt(pv.saldo_contabilizzato)} maturati − ${fmt(pv.spesa_totale)} spesi`
+    : "punti contabilizzati e spendibili";
+  $("d-credito").textContent = eur(pv.valore_eur);
+  $("d-appr").textContent = "+" + fmt(pv.saldo_in_approvazione);
+  $("d-appr-sub").textContent = pv.saldo_in_approvazione
+    ? "mese corrente, in validazione" : "tutto contabilizzato ✓";
+  $("d-pos").textContent = pv.posizione_classifica + "°";
+  $("d-pos-sub").textContent = `su ${pv.dimensione_cluster} PV · cluster ${pv.cluster}`;
+  $("d-mese-nota").textContent = "— " + gara.mese_corrente;
 
-  // andamento mensile
-  document.getElementById("mesi").innerHTML = pv.mesi.map(m => {
+  $("d-mesi").innerHTML = pv.mesi.map(m => {
     const nome = MESI_NOMI[m.periodo] + (m.parziale ? " · parziale" : "");
     if (m.quarantena) return `<div class="mese-card"><b>${nome}</b><br>
       <span class="chip warn">dati in verifica</span>
       <div class="small muted" style="margin-top:6px">flusso sospeso dal controllo qualità</div></div>`;
     const pct = Math.min(100, Math.round(100 * m.attivazioni_nette / m.target));
-    const obiettivo = m.parziale ? `<span class="muted small">obiettivo: a fine mese</span>`
+    const ob = m.parziale ? `<span class="muted small">obiettivo: a fine mese</span>`
       : (m.attivazioni_nette >= m.target ? `<span class="chip ok">obiettivo ✓ (+200)</span>`
                                          : `<span class="chip">obiettivo non raggiunto</span>`);
     return `<div class="mese-card"><b>${nome}</b>
-      <div class="kpi-valore" style="font-size:22px">${fmt(m.punti)} pt</div>
+      <div class="kpi-valore num" style="font-size:21px">${fmt(m.punti)} pt</div>
       <div class="small muted" style="margin:4px 0 6px">${m.attivazioni_nette}/${m.target} attivazioni nette</div>
       <div class="progress"><div style="width:${pct}%"></div></div>
-      <div style="margin-top:8px">${obiettivo}</div></div>`;
+      <div style="margin-top:8px">${ob}</div></div>`;
   }).join("");
 
-  // breakdown
   const ordine = ["punti_commodity","punti_fibra","punti_fotovoltaico","punti_wallbox",
-                  "punti_clima","bonus_obiettivo_mensile","bonus_tripletta","storni"];
-  document.getElementById("breakdown").innerHTML = ordine
-    .filter(k => pv.breakdown[k] !== undefined)
-    .map(k => { const v = pv.breakdown[k];
-      return `<div class="bk"><span>${MECC_NOMI[k]}</span>
-        <b class="${v < 0 ? "punti-neg" : "punti-pos"}">${v > 0 ? "+" : ""}${fmt(v)}</b></div>`; })
-    .join("");
-
-  // classifica del proprio cluster
-  document.getElementById("titolo-classifica").textContent = `Classifica cluster ${pv.cluster}`;
-  document.getElementById("classifica").innerHTML = classifiche[pv.cluster].map(r =>
-    `<tr class="${r.pv === pv.codice ? "evidenzia" : ""}">
-      <td>${r.posizione <= 3 ? ["🥇","🥈","🥉"][r.posizione-1] : r.posizione}</td>
-      <td>${r.insegna}<div class="small muted">${r.citta}</div></td>
-      <td style="text-align:right">${fmt(r.punti)}</td>
-      <td style="text-align:right">${r.indice.toLocaleString("it-IT")}</td></tr>`).join("");
-
-  // catalogo
-  document.getElementById("catalogo").innerHTML = catalogo.map(p => {
-    const ok = pv.saldo_contabilizzato >= p.punti;
-    return `<div class="premio"><div class="nome">${p.nome}</div>
-      <div class="muted small">${p.categoria}</div>
-      <div style="margin:8px 0 6px"><b>${fmt(p.punti)} pt</b> <span class="muted small">(${eur(p.punti * gara.tasso_eur_per_punto)})</span></div>
-      ${ok ? '<span class="chip ok">disponibile</span>'
-           : `<span class="chip">mancano ${fmt(p.punti - pv.saldo_contabilizzato)} pt</span>`}</div>`;
+                  "punti_clima","bonus_obiettivo_mensile","bonus_tripletta","storni","catalogo"];
+  const bd = {...pv.breakdown}; if (pv.spesa_totale) bd.catalogo = -pv.spesa_totale;
+  const max = Math.max(...Object.values(bd).map(Math.abs));
+  $("d-breakdown").innerHTML = ordine.filter(k => bd[k] !== undefined).map(k => {
+    const v = bd[k], pct = Math.round(100 * Math.abs(v) / max);
+    const colore = v < 0 ? "background:linear-gradient(90deg,#d3222a,#ff7a00)" : "";
+    return `<div class="barh"><span>${MECC[k]}</span>
+      <span class="traccia"><div style="width:${pct}%;${colore}"></div></span>
+      <span class="valore num ${v<0?"punti-neg":"punti-pos"}">${v>0?"+":""}${fmt(v)}</span></div>`;
   }).join("");
 
-  // movimenti
-  document.getElementById("movimenti").innerHTML = pv.movimenti.map(e =>
-    `<tr><td class="muted">${e.ts.slice(0,10)}</td><td>${MESI_NOMI[e.periodo] || e.periodo}</td>
-      <td>${e.descrizione}<div class="small muted">contratto v${e.contratto_v} · ${e.meccanica}</div></td>
-      <td style="text-align:right" class="${e.punti < 0 ? "punti-neg" : "punti-pos"}">${e.punti > 0 ? "+" : ""}${fmt(e.punti)}</td>
-      <td>${e.stato === "contabilizzato" ? '<span class="chip ok">contabilizzato</span>'
-                                         : '<span class="chip warn">in approvazione</span>'}</td></tr>`).join("");
+  $("d-cl-titolo").textContent = "Classifica cluster " + pv.cluster;
+  $("d-classifica").innerHTML = D.classifiche[pv.cluster].map(r =>
+    `<tr class="${r.pv === pv.codice ? "evidenzia" : ""}">
+      <td class="podio">${r.posizione <= 3 ? ["🥇","🥈","🥉"][r.posizione-1] : r.posizione}</td>
+      <td>${r.insegna}<div class="small muted">${r.citta}</div></td>
+      <td style="text-align:right" class="num">${fmt(r.punti)}</td>
+      <td style="text-align:right" class="num">${r.indice.toLocaleString("it-IT")}</td></tr>`).join("");
 
-  // comunicazioni
-  document.getElementById("comunicazioni").innerHTML = comunicazioni.map(c =>
+  $("d-news").innerHTML = D.news.slice(0, 2).map(c =>
     `<div class="bk" style="flex-direction:column; align-items:flex-start">
       <b>${c.titolo} <span class="muted small" style="font-weight:400">· ${c.data}</span></b>
       <span class="small">${c.testo}</span></div>`).join("");
 }
 
+/* ---------- catalogo ---------- */
+function renderCatalogo() {
+  const {pv, catalogo} = D;
+  $("c-saldo").textContent = `${fmt(pv.saldo_disponibile)} punti disponibili (${eur(pv.valore_eur)})`;
+  const categorie = ["", ...new Set(catalogo.map(p => p.categoria))];
+  $("c-filtri").innerHTML = categorie.map(c =>
+    `<span class="chip ${c === filtroCat ? "attivo" : ""}" onclick="filtroCat='${c}';renderCatalogo()">
+     ${c || "Tutti"}</span>`).join("");
+  $("c-griglia").innerHTML = catalogo.filter(p => !filtroCat || p.categoria === filtroCat).map(p => {
+    const ok = pv.saldo_disponibile >= p.punti;
+    return `<div class="premio cat-${p.categoria.replaceAll(" ", "\\ ")}">
+      <div class="visual">${p.emoji}</div>
+      <div class="corpo">
+        <div class="nome">${p.nome}</div>
+        <div class="small muted">${p.categoria} · ${p.consegna}</div>
+        <div><b class="num">${fmt(p.punti)} pt</b> <span class="muted small">(${eur(p.punti * D.gara.tasso_eur_per_punto)})</span></div>
+        <div class="azioni">
+          ${ok ? `<button class="primario" style="flex:1" onclick="confermaOrdine('${p.id}')">Richiedi</button>`
+               : `<button disabled style="flex:1">Mancano ${fmt(p.punti - pv.saldo_disponibile)} pt</button>`}
+        </div></div></div>`;
+  }).join("");
+}
+
+function confermaOrdine(id) {
+  const p = D.catalogo.find(x => x.id === id);
+  apriModale(`<h3>Confermi la richiesta?</h3>
+    <p class="small muted">Il premio viene scalato subito dal saldo disponibile.</p>
+    <div class="bk"><span>${p.emoji} <b>${p.nome}</b></span><b class="num">−${fmt(p.punti)} pt</b></div>
+    <div class="bk"><span>Saldo dopo la richiesta</span>
+      <b class="num">${fmt(D.pv.saldo_disponibile - p.punti)} pt</b></div>
+    <div class="bk"><span>Consegna</span><span class="small">${p.consegna}</span></div>
+    <div class="piede"><button class="fantasma" onclick="chiudiModale()">Annulla</button>
+    <button class="primario" onclick="ordina('${p.id}')">Conferma richiesta</button></div>`);
+}
+
+async function ordina(id) {
+  try {
+    const r = await apiPost(`/api/pv/${PV}/ordini`, {premio_id: id});
+    chiudiModale(); toast(`Richiesta inviata: ${r.ordine.premio} ✓`, "ok");
+    await carica(); location.hash = "#ordini";
+  } catch (e) { toast(e.detail || "errore nella richiesta", "ko"); }
+}
+
+/* ---------- ordini ---------- */
+function renderOrdini() {
+  const ordini = D.pv.ordini || [];
+  $("o-vuoto").style.display = ordini.length ? "none" : "block";
+  const stati = {richiesto:"warn", in_lavorazione:"blu", spedito:"ok"};
+  $("o-righe").innerHTML = ordini.map(o =>
+    `<tr><td class="muted small">${o.id}</td><td class="muted">${o.ts}</td>
+      <td><b>${o.premio}</b></td>
+      <td style="text-align:right" class="punti-neg num">−${fmt(o.punti)}</td>
+      <td><span class="chip ${stati[o.stato] || ""}">${o.stato.replace("_"," ")}</span></td></tr>`).join("");
+}
+
+/* ---------- movimenti ---------- */
+function movimentiFiltrati() {
+  const tipo = $("m-tipo").value, periodo = $("m-periodo").value;
+  return D.pv.movimenti.filter(m => (!tipo || m.tipo === tipo) && (!periodo || m.periodo === periodo));
+}
+function renderMovimenti() {
+  const periodi = [...new Set(D.pv.movimenti.map(m => m.periodo))].sort().reverse();
+  const sel = $("m-periodo"); const val = sel.value;
+  sel.innerHTML = '<option value="">tutti i periodi</option>' +
+    periodi.map(p => `<option ${p===val?"selected":""}>${p}</option>`).join("");
+  $("m-righe").innerHTML = movimentiFiltrati().map(e =>
+    `<tr><td class="muted">${e.ts.slice(0,10)}</td><td>${MESI_NOMI[e.periodo] || e.periodo}</td>
+      <td>${e.descrizione}<div class="small muted">${e.meccanica} · contratto v${e.contratto_v} · ${e.id}</div></td>
+      <td style="text-align:right" class="num ${e.punti<0?"punti-neg":"punti-pos"}">${e.punti>0?"+":""}${fmt(e.punti)}</td>
+      <td>${e.stato === "contabilizzato" ? '<span class="chip ok">contabilizzato</span>'
+                                          : '<span class="chip warn">in approvazione</span>'}</td></tr>`).join("")
+    || '<tr><td colspan="5" class="vuoto">nessun movimento con questi filtri</td></tr>';
+}
+$("m-tipo").onchange = renderMovimenti; $("m-periodo").onchange = renderMovimenti;
+$("m-export").onclick = () => {
+  const righe = [["id","data","periodo","tipo","descrizione","punti","stato"]]
+    .concat(movimentiFiltrati().map(e => [e.id, e.ts, e.periodo, e.tipo,
+      '"' + e.descrizione.replaceAll('"','""') + '"', e.punti, e.stato]));
+  const blob = new Blob([righe.map(r => r.join(",")).join("\n")], {type:"text/csv"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = `movimenti_${PV}.csv`; a.click(); toast("CSV esportato ✓", "ok");
+};
+
+/* ---------- assistenza ---------- */
+function renderAssistenza() {
+  const tickets = D.pv.tickets || [];
+  const aperti = tickets.filter(t => t.stato === "aperto").length;
+  $("badge-tck").style.display = aperti ? "" : "none"; $("badge-tck").textContent = aperti;
+  $("t-vuoto").style.display = tickets.length ? "none" : "block";
+  const stati = {aperto:"warn", in_lavorazione:"blu", risposto:"ok"};
+  $("t-lista").innerHTML = tickets.map(t => `
+    <div style="border:1px solid var(--bordo); border-radius:12px; padding:12px 14px; margin-bottom:10px">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+        <b>${t.oggetto}</b><span class="chip ${stati[t.stato]}">${t.stato.replace("_"," ")}</span>
+        <span class="muted small">${t.id} · ${t.ts}</span></div>
+      <div class="small muted" style="margin:4px 0">${t.categoria}${t.riferimento ? " · rif: " + t.riferimento : ""}</div>
+      <div class="small">${t.messaggio}</div>
+      ${t.risposte.map(r => `<div class="small" style="margin-top:8px; padding:9px 12px; background:#f0f6ff; border-radius:10px">
+        <b>${r.da}</b> <span class="muted">· ${r.ts}</span><br>${r.testo}</div>`).join("")}
+    </div>`).join("");
+}
+$("t-invia").onclick = async () => {
+  const corpo = {categoria: $("t-categoria").value, oggetto: $("t-oggetto").value.trim(),
+                 messaggio: $("t-msg").value.trim(), riferimento: $("t-rif").value.trim() || null};
+  if (!corpo.oggetto || !corpo.messaggio) return toast("Oggetto e messaggio sono obbligatori", "ko");
+  try {
+    await apiPost(`/api/pv/${PV}/tickets`, corpo);
+    $("t-oggetto").value = $("t-msg").value = $("t-rif").value = "";
+    toast("Richiesta inviata al contact center ✓", "ok"); await carica();
+  } catch (e) { toast(e.detail || "errore", "ko"); }
+};
+
+/* ---------- news ---------- */
+function renderNews() {
+  $("n-lista").innerHTML = D.news.map(c => `
+    <div class="card"><div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+      <b>${c.titolo}</b>${c.runtime ? '<span class="chip viola">nuova</span>' : ""}
+      <span class="muted small">${c.data}</span></div>
+      <p class="small" style="margin-top:6px">${c.testo}</p></div>`).join("");
+}
+
+/* ---------- avvio ---------- */
 (async () => {
   const lista = await api("/api/pv");
-  const sel = document.getElementById("sel-pv");
+  const sel = $("sel-pv");
   sel.innerHTML = lista.map(p => `<option value="${p.codice}">${p.insegna} (${p.cluster})</option>`).join("");
-  sel.value = "SE-MI-001";
-  sel.onchange = () => caricaPV(sel.value);
-  await caricaPV(sel.value);
+  sel.value = PV;
+  sel.onchange = async () => { PV = sel.value; localStorage.setItem("regolo_pv", PV); await carica(); };
+  await carica(); vai(location.hash);
 })();
 </script>
 </body>

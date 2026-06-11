@@ -49,6 +49,22 @@ Poi apri:
 
 > Porta **8788** scelta apposta per non collidere con MAGI (8765).
 
+## Cosa puoi provare (azioni reali, persistono in `mockup/output/runtime.json`)
+
+**Frontend punto vendita** (http://localhost:8788/) — dashboard con saldo/progressi/classifica,
+**catalogo con richiesta premi** (scala il saldo, con controllo disponibilità), storico ordini,
+**movimenti filtrabili + export CSV**, **assistenza/contact center** (apertura ticket, anche
+contestazioni ex art. 9.2, con thread di risposta), news.
+
+**Backoffice** (http://localhost:8788/backoffice) — panoramica con attività runtime, gare e
+versioni contratto, compilazione (incl. banner AI reale), **caricamenti con drag&drop e
+validazione vera** (schema/codici/anomalie vs storico), riconciliazione, what-if,
+**approvazione HITL del batch giugno** (sposta davvero gli eventi a contabilizzato: i saldi
+dei PV cambiano sul frontend), anagrafica con ricerca, **coda ticket con risposta**,
+**pubblicazione comunicazioni** (compaiono nelle news dei PV), risoluzione alert, ledger.
+
+Bottone **↺ Reset demo** nel backoffice per tornare allo stato iniziale.
+
 ## Cosa è reale e cosa è simulato
 
 | Layer | Nel mockup |
