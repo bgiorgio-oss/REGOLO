@@ -56,9 +56,10 @@ PIATTAFORMA, su una gara vera già attiva.
   regolamento, inclusi i casi limite; verdi prima di procedere
 
 ### Blocco 1.3 — Motore e riconciliazione (settimane 5–6)
-- ⬜ **Spike GoRules ZEN Engine** (MIT, `pip install zen-engine`): transpilare il contratto
-  SAM2026 in JDM, eseguirlo e confrontare coi 392 eventi del nostro motore — se regge,
-  L2 = ZEN + nostro layer effective dating/replay (vedi `docs/RICERCA_PROGETTI_SIMILI.md`)
+- ✅ **Spike GoRules ZEN Engine** (2026-06-11): contratto SAM2026 transpilato in JDM ed
+  eseguito — **392/392 celle identiche al motore, zero divergenze, 0,53 ms/valutazione**
+  (`spikes/zen/RISULTATO.md`). Decisione: in Fase 1 L2 = ZEN + nostro layer effective
+  dating/replay; il motore Python del mockup resta come doppio controllo (golden test)
 - ⬜ Adattare il motore alle meccaniche del contratto pilota (parametrico, zero hardcode)
 - ⬜ Ledger su DB (SQLite per la fase 1 basta) + run replay-abili
 - ⬜ Job notturno di riconciliazione: REGOLO vs export piattaforma, con diagnosi automatica
@@ -103,3 +104,4 @@ PIATTAFORMA, su una gara vera già attiva.
 | 2026-06-10 | AI a compile-time (mai a runtime sui calcoli) — confermato da Giorgio |
 | 2026-06-10 | Isolamento totale da AUTOMAZIONI/MAGI: reimplementare i pattern, mai importare |
 | 2026-06-10 | Frontend: sviluppo interno confermato |
+| 2026-06-11 | Motore L2 in Fase 1 = GoRules ZEN Engine (JDM) + nostro layer effective dating/replay — validato da spike con equivalenza 392/392 vs motore proprio |

@@ -1,0 +1,87 @@
+{
+ "nodes": [
+  {
+   "id": "in",
+   "type": "inputNode",
+   "name": "prestazioni_mese",
+   "position": {
+    "x": 0,
+    "y": 0
+   }
+  },
+  {
+   "id": "calc",
+   "type": "expressionNode",
+   "name": "meccaniche",
+   "position": {
+    "x": 250,
+    "y": 0
+   },
+   "content": {
+    "expressions": [
+     {
+      "id": "e0",
+      "key": "punti_commodity",
+      "value": "luce_gas > 0 ? min([luce_gas * 10, 900]) : 0"
+     },
+     {
+      "id": "e1",
+      "key": "punti_fibra",
+      "value": "fibra * 20"
+     },
+     {
+      "id": "e2",
+      "key": "punti_fotovoltaico",
+      "value": "fotovoltaico * 200"
+     },
+     {
+      "id": "e3",
+      "key": "punti_wallbox",
+      "value": "wallbox * 60"
+     },
+     {
+      "id": "e4",
+      "key": "punti_clima",
+      "value": "round(clima * 40 * (periodo in [\"2026-06\", \"2026-07\"] ? 1.5 : 1))"
+     },
+     {
+      "id": "e5",
+      "key": "storni",
+      "value": "-(storni_luce_gas * 10 + storni_fibra * 20)"
+     },
+     {
+      "id": "e6",
+      "key": "bonus_obiettivo_mensile",
+      "value": "mese_concluso and (luce_gas - storni_luce_gas) >= target ? 200 : 0"
+     },
+     {
+      "id": "e7",
+      "key": "bonus_tripletta",
+      "value": "mese_concluso and fotovoltaico >= 1 and wallbox >= 1 and clima >= 1 ? 100 : 0"
+     }
+    ]
+   }
+  },
+  {
+   "id": "out",
+   "type": "outputNode",
+   "name": "punti",
+   "position": {
+    "x": 500,
+    "y": 0
+   }
+  }
+ ],
+ "edges": [
+  {
+   "id": "ed1",
+   "sourceId": "in",
+   "targetId": "calc"
+  },
+  {
+   "id": "ed2",
+   "sourceId": "calc",
+   "targetId": "out"
+  }
+ ]
+}
