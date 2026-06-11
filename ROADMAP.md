@@ -47,15 +47,25 @@ Obiettivo: dimostrare l'affidabilità del calcolo a **rischio zero**, in paralle
 PIATTAFORMA, su una gara vera già attiva.
 
 ### Blocco 1.1 — Setup e materiale (settimane 1–2)
-- 🤝 Scegliere la **gara pilota** (criteri: regolamento già stabile, dati mensili regolari,
-  cliente non ostile a confronti)
+- 🤝 Scegliere la **gara pilota** — candidati trovati via MAGI (2026-06-11):
+  1. **«Enel Energy Rewards – Agenzie B2B – 1° Sem. 2026»** (`REGOLAMENTO DI
+     PARTECIPAZIONE.pdf`, Drive ID `1GTobn8jDsniOzEbDzEikkeIQaU59lmB4`) — gara **in corso**
+     (01/02→30/06/2026): pilota ideale. Nota MAGI: allegato premi/meccanica online, serve
+     il PDF completo + allegati
+  2. «Enel Energy Rewards – Agenzie B2B» 2025 (predecessore, lug→dic 2025) — utile come
+     secondo regolamento e per testare versioning tra edizioni
+  3. pista «La Forza del Team 2026» (file `enel.comunicazione.laforzadelteam2026...`) — da
+     approfondire
 - 🤝 Raccogliere su Drive **2–3 regolamenti reali** (pilota + 1–2 per varietà di meccaniche)
+  — ⚠ servono i file COMPLETI con allegati (tabelle premi/punti), non solo il corpo
 - 🤝 Censire gli **accessi**: export punteggi/prestazioni della piattaforma per la gara
   pilota (gli scarichi notturni esistono già in AUTOMAZIONI: qui si REPLICA il pattern,
   non si importa il codice)
 - ⬜ Estendere lo **schema del Contratto di Gara** alle meccaniche reali incontrate
   (gare a obiettivo, classifiche, raccolte punti, instant win, …)
-- ⬜ Decidere dove gira la Fase 1: Mac (semplice) vs Cloud Run (progetto GCP separato) → 🤝
+- ✅ Dove gira la Fase 1: **Cloud Run su progetto GCP nuovo e separato** (deciso da
+  Giorgio 2026-06-11). Setup pronto: `infra/setup_gcp.sh` (richiede `gcloud auth login`
+  interattivo — non tocca l'ADC condiviso con MAGI)
 
 ### Blocco 1.2 — Compilatore v1 (settimane 3–4)
 - ⬜ Pipeline compilazione: estrazione testo (PDF/DOCX) → structured output su schema →
@@ -66,7 +76,8 @@ PIATTAFORMA, su una gara vera già attiva.
   sulla via nativa `response_schema` — entrambe 17/17 sui parametri, ma il constrained
   decoding nativo sopprime le escalation di ambiguità (0/2 run), instructor le preserva
   (art. 5.7 trovato). Dettagli: `spikes/instructor/RISULTATO.md`
-- 🤝 Scegliere il modello LLM e il billing (Gemini su GCP nuovo progetto / altro)
+- ✅ Billing LLM: **Gemini via Vertex sul progetto GCP nuovo di REGOLO** (deciso da
+  Giorgio 2026-06-11); fino al setup del progetto si usa quello attuale (centesimi/run)
 - ⬜ Anonimizzazione sistematica: nessuna PII nei prompt (il compilatore lavora su regole)
 - ⬜ Compilare il regolamento della gara pilota → contratto v1 **approvato a mano**
 - ⬜ **Golden test di gara**: 15–30 casi (input → punteggio atteso) derivati dal
@@ -126,3 +137,7 @@ PIATTAFORMA, su una gara vera già attiva.
 | 2026-06-11 | Compilatore L1 in Fase 1 = schema Pydantic + instructor (NON response_schema nativo: il constrained decoding sopprime le escalation di ambiguità — vedi spike) |
 | 2026-06-11 | Ledger L3 = tabella append-only fatta in casa (SQLite → Postgres); niente Formance/Blnk/TigerBeetle in Fase 1 — `docs/DECISIONE_LEDGER.md` |
 | 2026-06-11 | La rilevazione ambiguità del compilatore varia tra run: in Fase 1 escalation = UNIONE di più passaggi/modelli, mai un run singolo |
+| 2026-06-11 | Fase 1 su Cloud Run, progetto GCP NUOVO e separato (anche per il billing LLM) — setup: `infra/setup_gcp.sh` |
+| 2026-06-11 | Referente ambiguità clausole: Giorgio o collega loyalty; validazione golden test: Giorgio |
+| 2026-06-11 | Dati prestazione gara pilota: arrivano per canali misti — censimento puntuale alla scelta del pilota |
+| 2026-06-11 | MAGI usabile come SERVIZIO (API HTTP) per trovare documenti: non viola l'isolamento (nessun codice condiviso) |
