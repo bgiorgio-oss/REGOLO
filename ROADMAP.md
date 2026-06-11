@@ -49,6 +49,10 @@ PIATTAFORMA, su una gara vera già attiva.
   report di compilazione con confidenze → escalation clausole dubbie
   *(bozza v0 già funzionante nel mockup: `mockup/01_contratto/compilatore.py` — da
   estendere: input PDF/DOCX, checklist ambiguità dalla KB, doppio modello)*
+- ✅ **Spike structured output** (2026-06-11): schema Pydantic + **instructor** scelto
+  sulla via nativa `response_schema` — entrambe 17/17 sui parametri, ma il constrained
+  decoding nativo sopprime le escalation di ambiguità (0/2 run), instructor le preserva
+  (art. 5.7 trovato). Dettagli: `spikes/instructor/RISULTATO.md`
 - 🤝 Scegliere il modello LLM e il billing (Gemini su GCP nuovo progetto / altro)
 - ⬜ Anonimizzazione sistematica: nessuna PII nei prompt (il compilatore lavora su regole)
 - ⬜ Compilare il regolamento della gara pilota → contratto v1 **approvato a mano**
@@ -105,3 +109,4 @@ PIATTAFORMA, su una gara vera già attiva.
 | 2026-06-10 | Isolamento totale da AUTOMAZIONI/MAGI: reimplementare i pattern, mai importare |
 | 2026-06-10 | Frontend: sviluppo interno confermato |
 | 2026-06-11 | Motore L2 in Fase 1 = GoRules ZEN Engine (JDM) + nostro layer effective dating/replay — validato da spike con equivalenza 392/392 vs motore proprio |
+| 2026-06-11 | Compilatore L1 in Fase 1 = schema Pydantic + instructor (NON response_schema nativo: il constrained decoding sopprime le escalation di ambiguità — vedi spike) |

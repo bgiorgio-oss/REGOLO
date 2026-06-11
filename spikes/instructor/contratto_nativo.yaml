@@ -1,0 +1,115 @@
+# Contratto proposto — spike structured output, via nativa (response_schema)
+meta:
+  gara: SPAZIO ALLA META 2026
+  codice: SAM2026
+  contratto_versione: 1
+  valido_dal: '2026-04-01'
+  valido_al: '2026-09-30'
+destinatari:
+  tipo: punti vendita "Spazio Enel Partner"
+  requisiti: che abbiano formalizzato l'adesione entro il 31/03/2026 e che risultino
+    attivi e in regola con gli obblighi contrattuali alla data di inizio dell'Operazione.
+  fonte_clausola: Art. 2
+cluster:
+  criterio: media mensile di attivazioni commodity registrata nell'anno 2025
+  fonte_clausola: Art. 4.1
+  definizioni:
+  - id: GOLD
+    condizione: ≥ 60
+    target_mensile_commodity: 80
+  - id: SILVER
+    condizione: da 30 a 59
+    target_mensile_commodity: 50
+  - id: BRONZE
+    condizione: < 30
+    target_mensile_commodity: 30
+kpi:
+- id: luce_gas
+  descrizione: contratto Luce o Gas residenziale
+- id: fibra
+  descrizione: contratto Fibra
+- id: fotovoltaico
+  descrizione: impianto fotovoltaico
+- id: wallbox
+  descrizione: wallbox di ricarica
+- id: clima
+  descrizione: climatizzatore
+meccaniche:
+- id: luce_gas
+  tipo: punti_per_unita
+  fonte_clausola: Art. 5.1
+  kpi: luce_gas
+  punti: 10.0
+  cap_mensile_punti: 600
+- id: fibra
+  tipo: punti_per_unita
+  fonte_clausola: Art. 5.2
+  kpi: fibra
+  punti: 20.0
+- id: fotovoltaico
+  tipo: punti_per_unita
+  fonte_clausola: Art. 5.3
+  kpi: fotovoltaico
+  punti: 150.0
+- id: wallbox
+  tipo: punti_per_unita
+  fonte_clausola: Art. 5.4
+  kpi: wallbox
+  punti: 60.0
+- id: clima
+  tipo: punti_per_unita
+  fonte_clausola: Art. 5.5
+  kpi: clima
+  punti: 40.0
+  moltiplicatori:
+  - periodi:
+    - 2026-06
+    - 2026-07
+    fattore: 1.5
+    fonte_clausola: Art. 6.3
+- id: storno_generico
+  tipo: storno
+  fonte_clausola: Art. 5.7
+  regola: In caso di annullamento, recesso o mancata attivazione effettiva del contratto
+    entro 60 giorni, i punti corrispondenti saranno stornati dal saldo del PV, anche
+    in Mesi di Gara successivi a quello di maturazione.
+- id: bonus_obiettivo
+  tipo: bonus_condizionale
+  fonte_clausola: Art. 6.1
+  punti: 200.0
+  condizione: raggiungimento dell'obiettivo mensile di cluster di cui all'art. 4.1,
+    calcolato sulle attivazioni commodity al netto degli storni
+  ricorrenza: mensile
+  liquidazione: in sede di consolidamento del Mese di Gara
+- id: bonus_tripletta
+  tipo: bonus_condizionale
+  fonte_clausola: Art. 6.2
+  punti: 100.0
+  condizione: nello stesso Mese di Gara realizzi almeno un fotovoltaico, una wallbox
+    e un climatizzatore
+  ricorrenza: mensile
+  liquidazione: in sede di consolidamento del Mese di Gara
+classifica_finale:
+  ambito: per ciascun cluster
+  indice: il totale dei punti maturati nei Mesi di Gara conclusi, rapportato all'obiettivo
+    mensile del cluster moltiplicato per il numero di Mesi di Gara conclusi.
+  premi_punti_extra:
+  - posizione: 1
+    punti: 5000
+  - posizione: 2
+    punti: 3000
+  - posizione: 3
+    punti: 1500
+  fonte_clausola: Art. 7.1, Art. 7.2
+valorizzazione:
+  tasso_eur_per_punto: 0.25
+  catalogo: catalogo premi dedicato
+  accredito: con cadenza mensile, entro il giorno 10 del mese successivo al Mese di
+    Gara di riferimento, previa validazione dei dati da parte dell'Agenzia.
+  fonte_clausola: Art. 8.1, Art. 8.2
+caricamenti:
+  flusso_prestazioni: mensilmente dal Promotore all'Agenzia entro il giorno 5 del
+    mese successivo al Mese di Gara di riferimento.
+  finestra_contestazioni_giorni: 30
+  fonte_clausola: Art. 9.1, Art. 9.2
+clausole_da_verificare: []

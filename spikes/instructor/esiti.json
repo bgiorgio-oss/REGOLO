@@ -1,0 +1,29 @@
+[
+ {
+  "via": "nativa (response_schema)",
+  "conformi": "17/17",
+  "escalation": [],
+  "meta": {
+   "via": "nativa (response_schema)",
+   "modello": "gemini-2.5-flash",
+   "tentativi": 1,
+   "durata_s": 78.7,
+   "token_input": 3275,
+   "token_output": 6375
+  }
+ },
+ {
+  "via": "instructor (from_genai)",
+  "conformi": "17/17",
+  "escalation": [
+   "Art. 5.7"
+  ],
+  "meta": {
+   "via": "instructor (from_genai)",
+   "modello": "gemini-2.5-flash",
+   "durata_s": 56.7,
+   "token_input": 2878,
+   "token_output": 4622
+  }
+ }
+]
