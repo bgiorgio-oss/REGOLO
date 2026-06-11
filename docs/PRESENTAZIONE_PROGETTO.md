@@ -348,7 +348,8 @@ KPI su attivazioni commodity, fibra, fotovoltaico, wallbox e clima.
 | Tappa | File | Cosa dimostra |
 |---|---|---|
 | Il regolamento | `00_regolamento/REGOLAMENTO_SPAZIO_ALLA_META_2026.md` | La fonte: 12 articoli, con 2 clausole volutamente ambigue |
-| La compilazione | `01_contratto/compilazione_report.json` | Come lavora L1: clausola per clausola, confidenza, 2 escalation a umano con risoluzione agli atti |
+| La compilazione (narrativa) | `01_contratto/compilazione_report.json` | Come lavora L1: clausola per clausola, confidenza, 2 escalation a umano con risoluzione agli atti |
+| La compilazione (AI REALE, v0) | `01_contratto/compilatore.py` | Un LLM vero (Gemini via Vertex ADC, fallback Ollama) compila il regolamento e **si auto-verifica** contro il contratto approvato: primo run 17/17 parametri conformi, escalation automatica dell'ambiguità all'art. 5.7 |
 | Il contratto | `01_contratto/gara_spazio_alla_meta.v1.yaml` + `.v2.yaml` | La spec eseguibile; la v2 è la revisione in corso d'opera (cap 600→900, fotovoltaico 150→200 dal 1/6) |
 | I dati | `02_dati/*.csv` | Anagrafica, prestazioni aprile/maggio/giugno (parziale), export della piattaforma legacy |
 | Il motore | `03_motore/motore.py` | **Vero**: calcola tutto, applica effective dating v1/v2, quarantena un'anomalia, riconcilia con la piattaforma (trova 2 divergenze reali), esegue il what-if retroattivo |

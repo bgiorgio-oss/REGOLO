@@ -115,6 +115,20 @@ def compilazione():
     return stato()["compilazione"]
 
 
+@app.get("/api/compilazione_ai")
+def compilazione_ai():
+    """Report della compilazione AI REALE (se eseguita: mockup/01_contratto/compilatore.py)."""
+    base = MOCKUP / "01_contratto" / "compilato_ai"
+    rep = base / "compilazione_report_ai.json"
+    if not rep.exists():
+        raise HTTPException(404, "compilazione AI non ancora eseguita")
+    out = json.loads(rep.read_text())
+    confronto = base / "confronto_v1.json"
+    if confronto.exists():
+        out["confronto_v1"] = json.loads(confronto.read_text())
+    return out
+
+
 @app.get("/api/ledger")
 def ledger(pv: str | None = None, limit: int = 100):
     f = OUTPUT / "ledger.jsonl"

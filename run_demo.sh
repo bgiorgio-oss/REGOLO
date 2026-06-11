@@ -21,6 +21,14 @@ fi
 echo "▸ Eseguo il motore…"
 venv/bin/python mockup/03_motore/motore.py
 
+# 3-bis. compilatore AI reale (opzionale: ./run_demo.sh --ai)
+#        Richiede un provider LLM (Vertex ADC configurato in .env, o Ollama locale).
+if [ "$1" = "--ai" ] || [ "$2" = "--ai" ]; then
+  echo "▸ Compilazione AI reale del regolamento (L1)…"
+  venv/bin/python mockup/01_contratto/compilatore.py \
+    || echo "⚠ Compilazione AI non riuscita — la demo continua col contratto approvato"
+fi
+
 # 4. API + frontend
 echo ""
 echo "════════════════════════════════════════════════════"

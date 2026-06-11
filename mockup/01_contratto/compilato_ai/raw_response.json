@@ -1,0 +1,580 @@
+{
+  "contratto": {
+    "meta": {
+      "gara": "SPAZIO ALLA META 2026",
+      "codice": "SAM2026",
+      "contratto_versione": 1,
+      "valido_dal": "2026-04-01",
+      "valido_al": "2026-09-30"
+    },
+    "destinatari": {
+      "tipo": "punti vendita \"Spazio Enel Partner\"",
+      "requisiti": "che abbiano formalizzato l'adesione entro il 31/03/2026 e che risultino attivi e in regola con gli obblighi contrattuali alla data di inizio dell'Operazione",
+      "fonte_clausola": "art. 2"
+    },
+    "cluster": {
+      "criterio": "media mensile di attivazioni commodity registrata nell'anno 2025",
+      "fonte_clausola": "art. 4.1",
+      "definizioni": [
+        {
+          "id": "GOLD",
+          "condizione": "media_mensile_attivazioni_2025 >= 60",
+          "target_mensile_commodity": 80
+        },
+        {
+          "id": "SILVER",
+          "condizione": "media_mensile_attivazioni_2025 >= 30 AND media_mensile_attivazioni_2025 <= 59",
+          "target_mensile_commodity": 50
+        },
+        {
+          "id": "BRONZE",
+          "condizione": "media_mensile_attivazioni_2025 < 30",
+          "target_mensile_commodity": 30
+        }
+      ]
+    },
+    "kpi": [
+      {
+        "id": "luce_gas",
+        "descrizione": "Contratto Luce o Gas residenziale"
+      },
+      {
+        "id": "fibra",
+        "descrizione": "Contratto Fibra"
+      },
+      {
+        "id": "fotovoltaico",
+        "descrizione": "Impianto fotovoltaico"
+      },
+      {
+        "id": "wallbox",
+        "descrizione": "Wallbox di ricarica"
+      },
+      {
+        "id": "clima",
+        "descrizione": "Climatizzatore"
+      }
+    ],
+    "meccaniche": [
+      {
+        "id": "punti_luce_gas",
+        "tipo": "punti_per_unita",
+        "kpi": "luce_gas",
+        "punti": 10,
+        "cap_mensile_punti": 600,
+        "cap_mensile_punti_base": "lordo_storni",
+        "fonte_clausola": "art. 5.1, art. 5.6"
+      },
+      {
+        "id": "punti_fibra",
+        "tipo": "punti_per_unita",
+        "kpi": "fibra",
+        "punti": 20,
+        "fonte_clausola": "art. 5.2"
+      },
+      {
+        "id": "punti_fotovoltaico",
+        "tipo": "punti_per_unita",
+        "kpi": "fotovoltaico",
+        "punti": 150,
+        "fonte_clausola": "art. 5.3"
+      },
+      {
+        "id": "punti_wallbox",
+        "tipo": "punti_per_unita",
+        "kpi": "wallbox",
+        "punti": 60,
+        "fonte_clausola": "art. 5.4"
+      },
+      {
+        "id": "punti_clima",
+        "tipo": "punti_per_unita",
+        "kpi": "clima",
+        "punti": 40,
+        "moltiplicatori": [
+          {
+            "periodi": [
+              "2026-06",
+              "2026-07"
+            ],
+            "fattore": 1.5,
+            "fonte_clausola": "art. 6.3"
+          }
+        ],
+        "fonte_clausola": "art. 5.5"
+      },
+      {
+        "id": "storni_generici",
+        "tipo": "storno",
+        "regola": "In caso di annullamento, recesso o mancata attivazione effettiva del contratto entro 60 giorni, i punti corrispondenti saranno stornati dal saldo del PV, anche in Mesi di Gara successivi a quello di maturazione.",
+        "fonte_clausola": "art. 5.7",
+        "stato": "da_verificare",
+        "motivo_escalation": "La decorrenza dei '60 giorni' per lo storno non è specificata. Non è chiaro se si riferisca alla data di firma del contratto, alla data di attivazione, o ad altro evento."
+      },
+      {
+        "id": "bonus_obiettivo_mensile",
+        "tipo": "bonus_condizionale",
+        "condizione": "raggiungimento dell'obiettivo mensile di cluster di cui all'art. 4.1, calcolato sulle attivazioni commodity al netto degli storni",
+        "punti": 200,
+        "ricorrenza": "per_mese",
+        "liquidazione": "solo_mese_concluso",
+        "fonte_clausola": "art. 6.1, art. 6.4"
+      },
+      {
+        "id": "bonus_tripletta",
+        "tipo": "bonus_condizionale",
+        "condizione": "nello stesso Mese di Gara realizzi almeno un fotovoltaico, una wallbox e un climatizzatore",
+        "punti": 100,
+        "ricorrenza": "per_mese",
+        "liquidazione": "solo_mese_concluso",
+        "fonte_clausola": "art. 6.2, art. 6.4"
+      }
+    ],
+    "classifica_finale": {
+      "ambito": "per ciascun cluster",
+      "indice": "totale dei punti maturati nei Mesi di Gara conclusi, rapportato all'obiettivo mensile del cluster moltiplicato per il numero di Mesi di Gara conclusi",
+      "premi_punti_extra": [
+        {
+          "posizione": 1,
+          "punti": 5000
+        },
+        {
+          "posizione": 2,
+          "punti": 3000
+        },
+        {
+          "posizione": 3,
+          "punti": 1500
+        }
+      ],
+      "fonte_clausola": "art. 7.1, art. 7.2"
+    },
+    "valorizzazione": {
+      "tasso_eur_per_punto": 0.25,
+      "catalogo": "catalogo premi dedicato",
+      "accredito": "con cadenza mensile, entro il giorno 10 del mese successivo al Mese di Gara di riferimento, previa validazione dei dati da parte dell'Agenzia",
+      "fonte_clausola": "art. 8.1, art. 8.2"
+    },
+    "caricamenti": {
+      "flusso_prestazioni": "mensilmente dal Promotore all'Agenzia entro il giorno 5 del mese successivo al Mese di Gara di riferimento",
+      "finestra_contestazioni_giorni": 30,
+      "fonte_clausola": "art. 9.1, art. 9.2"
+    },
+    "clausole_da_verificare": [
+      {
+        "articolo": "art. 5.7",
+        "dubbio": "La decorrenza dei '60 giorni' per lo storno non è specificata. Non è chiaro se si riferisca alla data di firma del contratto, alla data di attivazione, o ad altro evento."
+      }
+    ]
+  },
+  "report": {
+    "clausole": [
+      {
+        "id": "C01",
+        "articolo": "Header",
+        "testo_estratto": "Codice operazione: SAM2026",
+        "interpretazione": "Codice identificativo dell'operazione a premi.",
+        "campo_contratto": "contratto.meta.codice",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C02",
+        "articolo": "Header",
+        "testo_estratto": "Rev. originale del 20/03/2026",
+        "interpretazione": "Data di revisione originale del regolamento. Non è una data di validità dell'operazione.",
+        "campo_contratto": null,
+        "confidenza": 0.9,
+        "stato": "auto"
+      },
+      {
+        "id": "C03",
+        "articolo": "art. 1",
+        "testo_estratto": "L'operazione a premi «Spazio alla Meta 2026» (di seguito, l'\"Operazione\") è promossa da Enel Energia S.p.A. (di seguito, il \"Promotore\").",
+        "interpretazione": "Identificazione del soggetto promotore dell'operazione.",
+        "campo_contratto": null,
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C04",
+        "articolo": "art. 1",
+        "testo_estratto": "Soggetto delegato per la gestione operativa dell'Operazione è H&A Motivation Company S.r.l. (di seguito, l'\"Agenzia\").",
+        "interpretazione": "Identificazione del soggetto delegato per la gestione operativa.",
+        "campo_contratto": null,
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C05",
+        "articolo": "art. 2",
+        "testo_estratto": "Sono destinatari dell'Operazione i punti vendita \"Spazio Enel Partner\" (di seguito, \"PV\")",
+        "interpretazione": "Definizione della tipologia di soggetti destinatari dell'operazione.",
+        "campo_contratto": "contratto.destinatari.tipo",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C06",
+        "articolo": "art. 2",
+        "testo_estratto": "che abbiano formalizzato l'adesione entro il 31/03/2026 e che risultino attivi e in regola con gli obblighi contrattuali alla data di inizio dell'Operazione.",
+        "interpretazione": "Requisiti specifici che i destinatari devono possedere per partecipare all'operazione.",
+        "campo_contratto": "contratto.destinatari.requisiti",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C07",
+        "articolo": "art. 3",
+        "testo_estratto": "L'Operazione si svolge dal 1° aprile 2026",
+        "interpretazione": "Data di inizio validità dell'operazione.",
+        "campo_contratto": "contratto.meta.valido_dal",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C08",
+        "articolo": "art. 3",
+        "testo_estratto": "al 30 settembre 2026 (il \"Periodo\").",
+        "interpretazione": "Data di fine validità dell'operazione.",
+        "campo_contratto": "contratto.meta.valido_al",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C09",
+        "articolo": "art. 3",
+        "testo_estratto": "Ai fini del calcolo, il Periodo è suddiviso in mesi solari (\"Mesi di Gara\").",
+        "interpretazione": "Specificazione che il periodo di gara è suddiviso in mesi solari per i calcoli.",
+        "campo_contratto": null,
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C10",
+        "articolo": "art. 4.1",
+        "testo_estratto": "Ciascun PV è assegnato, per l'intera durata dell'Operazione, a uno dei seguenti cluster, determinati sulla base della media mensile di attivazioni commodity registrata nell'anno 2025:",
+        "interpretazione": "Criterio per l'assegnazione dei PV ai cluster.",
+        "campo_contratto": "contratto.cluster.criterio",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C11",
+        "articolo": "art. 4.1",
+        "testo_estratto": "GOLD | ≥ 60 | 80",
+        "interpretazione": "Definizione del cluster GOLD, inclusa la condizione di appartenenza e l'obiettivo mensile di attivazioni commodity nette.",
+        "campo_contratto": "contratto.cluster.definizioni[id=GOLD]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C12",
+        "articolo": "art. 4.1",
+        "testo_estratto": "SILVER | da 30 a 59 | 50",
+        "interpretazione": "Definizione del cluster SILVER, inclusa la condizione di appartenenza e l'obiettivo mensile di attivazioni commodity nette.",
+        "campo_contratto": "contratto.cluster.definizioni[id=SILVER]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C13",
+        "articolo": "art. 4.1",
+        "testo_estratto": "BRONZE | < 30 | 30",
+        "interpretazione": "Definizione del cluster BRONZE, inclusa la condizione di appartenenza e l'obiettivo mensile di attivazioni commodity nette.",
+        "campo_contratto": "contratto.cluster.definizioni[id=BRONZE]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C14",
+        "articolo": "art. 4.2",
+        "testo_estratto": "L'assegnazione ai cluster è comunicata a ciascun PV prima dell'inizio dell'Operazione e non è modificabile in corso d'Operazione.",
+        "interpretazione": "Regola sulla stabilità dell'assegnazione ai cluster per tutta la durata dell'operazione.",
+        "campo_contratto": null,
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C15",
+        "articolo": "art. 5.1",
+        "testo_estratto": "Per ogni contratto Luce o Gas residenziale (\"commodity\") attivato nel Periodo",
+        "interpretazione": "Definizione del KPI 'luce_gas' (commodity).",
+        "campo_contratto": "contratto.kpi[id=luce_gas]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C16",
+        "articolo": "art. 5.1",
+        "testo_estratto": "il PV matura 10 punti, fino a un massimo di 600 punti per Mese di Gara a tale titolo.",
+        "interpretazione": "Meccanica di assegnazione punti per il KPI 'luce_gas', con cap mensile.",
+        "campo_contratto": "contratto.meccaniche[id=punti_luce_gas]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C17",
+        "articolo": "art. 5.2",
+        "testo_estratto": "Per ogni contratto Fibra attivato nel Periodo",
+        "interpretazione": "Definizione del KPI 'fibra'.",
+        "campo_contratto": "contratto.kpi[id=fibra]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C18",
+        "articolo": "art. 5.2",
+        "testo_estratto": "il PV matura 20 punti.",
+        "interpretazione": "Meccanica di assegnazione punti per il KPI 'fibra'.",
+        "campo_contratto": "contratto.meccaniche[id=punti_fibra]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C19",
+        "articolo": "art. 5.3",
+        "testo_estratto": "Per ogni impianto fotovoltaico venduto nel Periodo",
+        "interpretazione": "Definizione del KPI 'fotovoltaico'.",
+        "campo_contratto": "contratto.kpi[id=fotovoltaico]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C20",
+        "articolo": "art. 5.3",
+        "testo_estratto": "il PV matura 150 punti.",
+        "interpretazione": "Meccanica di assegnazione punti per il KPI 'fotovoltaico'.",
+        "campo_contratto": "contratto.meccaniche[id=punti_fotovoltaico]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C21",
+        "articolo": "art. 5.4",
+        "testo_estratto": "Per ogni wallbox di ricarica venduta nel Periodo",
+        "interpretazione": "Definizione del KPI 'wallbox'.",
+        "campo_contratto": "contratto.kpi[id=wallbox]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C22",
+        "articolo": "art. 5.4",
+        "testo_estratto": "il PV matura 60 punti.",
+        "interpretazione": "Meccanica di assegnazione punti per il KPI 'wallbox'.",
+        "campo_contratto": "contratto.meccaniche[id=punti_wallbox]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C23",
+        "articolo": "art. 5.5",
+        "testo_estratto": "Per ogni climatizzatore venduto nel Periodo",
+        "interpretazione": "Definizione del KPI 'clima'.",
+        "campo_contratto": "contratto.kpi[id=clima]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C24",
+        "articolo": "art. 5.5",
+        "testo_estratto": "il PV matura 40 punti.",
+        "interpretazione": "Meccanica di assegnazione punti per il KPI 'clima'.",
+        "campo_contratto": "contratto.meccaniche[id=punti_clima]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C25",
+        "articolo": "art. 5.6",
+        "testo_estratto": "Il massimale di cui all'art. 5.1 si applica ai punti maturati nel Mese di Gara a titolo di attivazioni commodity, al lordo di eventuali storni.",
+        "interpretazione": "Chiarimento che il cap mensile per le attivazioni commodity si applica al lordo degli storni.",
+        "campo_contratto": "contratto.meccaniche[id=punti_luce_gas].cap_mensile_punti_base",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C26",
+        "articolo": "art. 5.7",
+        "testo_estratto": "In caso di annullamento, recesso o mancata attivazione effettiva del contratto entro 60 giorni, i punti corrispondenti saranno stornati dal saldo del PV, anche in Mesi di Gara successivi a quello di maturazione.",
+        "interpretazione": "Regola per lo storno dei punti in caso di annullamento, recesso o mancata attivazione.",
+        "campo_contratto": "contratto.meccaniche[id=storni_generici]",
+        "confidenza": 0.6,
+        "stato": "da_verificare",
+        "motivo_escalation": "La decorrenza dei '60 giorni' per lo storno non è specificata. Non è chiaro se si riferisca alla data di firma del contratto, alla data di attivazione, o ad altro evento."
+      },
+      {
+        "id": "C27",
+        "articolo": "art. 6.1",
+        "testo_estratto": "al raggiungimento dell'obiettivo mensile di cluster di cui all'art. 4.1, calcolato sulle attivazioni commodity al netto degli storni, al PV è riconosciuto un bonus di 200 punti.",
+        "interpretazione": "Meccanica del bonus per il raggiungimento dell'obiettivo mensile di cluster, calcolato al netto degli storni.",
+        "campo_contratto": "contratto.meccaniche[id=bonus_obiettivo_mensile]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C28",
+        "articolo": "art. 6.2",
+        "testo_estratto": "al PV che nello stesso Mese di Gara realizzi almeno un fotovoltaico, una wallbox e un climatizzatore è riconosciuto un bonus di 100 punti.",
+        "interpretazione": "Meccanica del bonus 'tripletta' per la vendita combinata di specifici prodotti nello stesso mese.",
+        "campo_contratto": "contratto.meccaniche[id=bonus_tripletta]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C29",
+        "articolo": "art. 6.3",
+        "testo_estratto": "nei Mesi di Gara di giugno e luglio 2026, i punti di cui all'art. 5.5 (climatizzatori) sono moltiplicati per 1,5.",
+        "interpretazione": "Moltiplicatore di punti per i climatizzatori applicato in specifici mesi.",
+        "campo_contratto": "contratto.meccaniche[id=punti_clima].moltiplicatori",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C30",
+        "articolo": "art. 6.4",
+        "testo_estratto": "I bonus di cui al presente articolo sono riconosciuti in sede di consolidamento del Mese di Gara, sulla base dei dati validati.",
+        "interpretazione": "Modalità e tempistiche di riconoscimento dei bonus.",
+        "campo_contratto": "contratto.meccaniche[id=bonus_obiettivo_mensile].liquidazione, contratto.meccaniche[id=bonus_tripletta].liquidazione",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C31",
+        "articolo": "art. 7.1",
+        "testo_estratto": "Al termine dell'Operazione è redatta, per ciascun cluster, una classifica",
+        "interpretazione": "Ambito di applicazione della classifica finale (per cluster).",
+        "campo_contratto": "contratto.classifica_finale.ambito",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C32",
+        "articolo": "art. 7.1",
+        "testo_estratto": "basata sull'indice di performance: il totale dei punti maturati nei Mesi di Gara conclusi, rapportato all'obiettivo mensile del cluster moltiplicato per il numero di Mesi di Gara conclusi.",
+        "interpretazione": "Definizione dell'indice di performance utilizzato per la classifica finale.",
+        "campo_contratto": "contratto.classifica_finale.indice",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C33",
+        "articolo": "art. 7.2",
+        "testo_estratto": "Ai primi tre classificati di ciascun cluster sono riconosciuti i seguenti punti aggiuntivi: 1° classificato: 5.000 punti;",
+        "interpretazione": "Punti aggiuntivi per il 1° classificato di ciascun cluster.",
+        "campo_contratto": "contratto.classifica_finale.premi_punti_extra[posizione=1]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C34",
+        "articolo": "art. 7.2",
+        "testo_estratto": "2° classificato: 3.000 punti;",
+        "interpretazione": "Punti aggiuntivi per il 2° classificato di ciascun cluster.",
+        "campo_contratto": "contratto.classifica_finale.premi_punti_extra[posizione=2]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C35",
+        "articolo": "art. 7.2",
+        "testo_estratto": "3° classificato: 1.500 punti.",
+        "interpretazione": "Punti aggiuntivi per il 3° classificato di ciascun cluster.",
+        "campo_contratto": "contratto.classifica_finale.premi_punti_extra[posizione=3]",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C36",
+        "articolo": "art. 8.1",
+        "testo_estratto": "I punti maturati sono convertiti in credito spendibile sul catalogo premi dedicato, al tasso di 0,25 € per punto.",
+        "interpretazione": "Tasso di conversione dei punti in valore monetario.",
+        "campo_contratto": "contratto.valorizzazione.tasso_eur_per_punto",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C37",
+        "articolo": "art. 8.1",
+        "testo_estratto": "I punti maturati sono convertiti in credito spendibile sul catalogo premi dedicato",
+        "interpretazione": "Descrizione del catalogo premi.",
+        "campo_contratto": "contratto.valorizzazione.catalogo",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C38",
+        "articolo": "art. 8.2",
+        "testo_estratto": "Il credito è accreditato sulla posizione di ciascun PV con cadenza mensile, entro il giorno 10 del mese successivo al Mese di Gara di riferimento, previa validazione dei dati da parte dell'Agenzia.",
+        "interpretazione": "Modalità e tempistiche di accredito del credito ai PV.",
+        "campo_contratto": "contratto.valorizzazione.accredito",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C39",
+        "articolo": "art. 8.3",
+        "testo_estratto": "Il catalogo può essere aggiornato in corso d'Operazione.",
+        "interpretazione": "Clausola che indica la possibilità di aggiornamento del catalogo premi. Non ha impatto diretto sul calcolo dei punti o del valore.",
+        "campo_contratto": null,
+        "confidenza": 0.9,
+        "stato": "auto"
+      },
+      {
+        "id": "C40",
+        "articolo": "art. 9.1",
+        "testo_estratto": "I dati di prestazione (attivazioni, vendite, annullamenti) sono trasmessi mensilmente dal Promotore all'Agenzia entro il giorno 5 del mese successivo al Mese di Gara di riferimento.",
+        "interpretazione": "Tempistiche e frequenza di trasmissione dei dati di prestazione.",
+        "campo_contratto": "contratto.caricamenti.flusso_prestazioni",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C41",
+        "articolo": "art. 9.2",
+        "testo_estratto": "Ciascun PV può presentare contestazioni sui punteggi pubblicati entro 30 giorni dalla pubblicazione, tramite i canali di assistenza dedicati.",
+        "interpretazione": "Finestra temporale per la presentazione di contestazioni sui punteggi.",
+        "campo_contratto": "contratto.caricamenti.finestra_contestazioni_giorni",
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C42",
+        "articolo": "art. 10",
+        "testo_estratto": "Le comunicazioni relative all'Operazione (andamento, classifiche, iniziative) sono rese disponibili tramite il portale dedicato e gli ulteriori canali indicati dall'Agenzia.",
+        "interpretazione": "Modalità di comunicazione delle informazioni relative all'operazione.",
+        "campo_contratto": null,
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C43",
+        "articolo": "art. 11",
+        "testo_estratto": "Il trattamento dei dati personali connessi all'Operazione avviene nel rispetto del Regolamento (UE) 2016/679 (GDPR), secondo l'informativa resa disponibile sul portale.",
+        "interpretazione": "Riferimento alla normativa sul trattamento dei dati personali.",
+        "campo_contratto": null,
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C44",
+        "articolo": "art. 12.1",
+        "testo_estratto": "Il presente regolamento è l'unico documento che disciplina l'Operazione. Eventuali revisioni saranno comunicate ai destinatari e avranno effetto dalla data ivi indicata.",
+        "interpretazione": "Clausola sulla validità esclusiva del regolamento e gestione delle revisioni.",
+        "campo_contratto": null,
+        "confidenza": 1.0,
+        "stato": "auto"
+      },
+      {
+        "id": "C45",
+        "articolo": "art. 12.2",
+        "testo_estratto": "Per quanto non previsto, si applica la normativa vigente in materia di manifestazioni a premio (DPR 26 ottobre 2001, n. 430).",
+        "interpretazione": "Riferimento alla normativa generale per quanto non esplicitamente previsto dal regolamento.",
+        "campo_contratto": null,
+        "confidenza": 1.0,
+        "stato": "auto"
+      }
+    ]
+  }
+}

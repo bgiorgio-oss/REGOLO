@@ -65,6 +65,7 @@
   <section id="compilazione">
     <h1 style="margin-bottom:6px">Compilazione del regolamento</h1>
     <p class="muted small" style="margin-bottom:14px" id="comp-meta">—</p>
+    <div id="comp-ai"></div>
     <div class="riga" style="margin-bottom:16px" id="comp-kpi"></div>
     <div id="comp-clausole"></div>
   </section>
@@ -191,6 +192,30 @@ async function init() {
         il ${c.escalation.verificato_il}</span></div>` : ""}
     </div>`;
   }).join("");
+
+  // ----- compilazione AI reale (banner, solo se eseguita) -----
+  try {
+    const ai = await api("/api/compilazione_ai");
+    if (ai && ai.esecuzione) {
+      const cv = ai.confronto_v1 || {};
+      const diffs = (cv.righe || []).filter(r => r.esito !== "OK");
+      const esc = (ai.clausole || []).filter(c => c.stato === "da_verificare" || c.confidenza < (ai.soglia_confidenza || .8));
+      document.getElementById("comp-ai").innerHTML = `
+        <div class="card" style="border-left:4px solid var(--viola); margin-bottom:16px">
+          <b>🤖 Compilazione AI reale eseguita</b>
+          <span class="chip viola">${ai.esecuzione.provider} · ${ai.esecuzione.modello}</span>
+          <p class="small" style="margin-top:6px">${ai.esecuzione.durata_s}s ·
+            ${ai.esecuzione.token_input ?? "?"} token in / ${ai.esecuzione.token_output ?? "?"} out ·
+            auto-verifica vs contratto approvato: <b>${cv.conformi ?? "?"}/${cv.totale ?? "?"} parametri conformi</b> ·
+            escalation a umano: <b>${esc.length}</b></p>
+          ${esc.map(c => `<p class="small">⚠ <b>${c.articolo}</b> (conf. ${Math.round((c.confidenza || 0) * 100)}%):
+            ${c.motivo_escalation || c.interpretazione}</p>`).join("")}
+          ${diffs.length ? `<p class="small">Parametri difformi: <b>${diffs.map(d => d.parametro).join(", ")}</b></p>` : ""}
+          <p class="small muted">Il contratto proposto dall'AI è in <code>mockup/01_contratto/compilato_ai/</code> —
+          non sostituisce il v1 approvato finché un umano non firma (HITL).</p>
+        </div>`;
+    }
+  } catch (e) { /* compilazione AI non eseguita: nessun banner */ }
 
   // ----- riconciliazione -----
   document.getElementById("ric-kpi").innerHTML =

@@ -19,6 +19,10 @@ sul Desktop («REGOLO - Piano Operativo Fasi.html»).*
   what-if retroattivo (+6.750 pt / +1.687,50 €)
 - ✅ API di serving FastAPI (:8788) + frontend utente + backoffice
 - ✅ Verifica manuale dei conti (SE-MI-001 voce per voce)
+- ✅ **Compilatore L1 v0 REALE** (2026-06-11): Gemini 2.5 Flash via Vertex ADC su `.env`
+  proprio di REGOLO — 17/17 parametri conformi al contratto approvato, escalation
+  automatica dell'ambiguità art. 5.7 (decorrenza storni) grazie alla checklist ambiguità
+  nel prompt; banner risultati nel backoffice; `./run_demo.sh --ai`
 
 **Uscita fase**: decisione go/no-go interna → 🤝 presentare la demo e decidere
 
@@ -43,6 +47,8 @@ PIATTAFORMA, su una gara vera già attiva.
 ### Blocco 1.2 — Compilatore v1 (settimane 3–4)
 - ⬜ Pipeline compilazione: estrazione testo (PDF/DOCX) → structured output su schema →
   report di compilazione con confidenze → escalation clausole dubbie
+  *(bozza v0 già funzionante nel mockup: `mockup/01_contratto/compilatore.py` — da
+  estendere: input PDF/DOCX, checklist ambiguità dalla KB, doppio modello)*
 - 🤝 Scegliere il modello LLM e il billing (Gemini su GCP nuovo progetto / altro)
 - ⬜ Anonimizzazione sistematica: nessuna PII nei prompt (il compilatore lavora su regole)
 - ⬜ Compilare il regolamento della gara pilota → contratto v1 **approvato a mano**

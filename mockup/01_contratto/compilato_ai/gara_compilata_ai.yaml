@@ -1,0 +1,127 @@
+# Contratto di Gara PROPOSTO DALL'AI — in attesa di review e approvazione umana.
+# Generato da: gemini-vertex / gemini-2.5-flash — NON usato dal motore
+# finché non viene approvato (HITL).
+meta:
+  gara: SPAZIO ALLA META 2026
+  codice: SAM2026
+  contratto_versione: 1
+  valido_dal: '2026-04-01'
+  valido_al: '2026-09-30'
+destinatari:
+  tipo: punti vendita "Spazio Enel Partner"
+  requisiti: che abbiano formalizzato l'adesione entro il 31/03/2026 e che risultino
+    attivi e in regola con gli obblighi contrattuali alla data di inizio dell'Operazione
+  fonte_clausola: art. 2
+cluster:
+  criterio: media mensile di attivazioni commodity registrata nell'anno 2025
+  fonte_clausola: art. 4.1
+  definizioni:
+  - id: GOLD
+    condizione: media_mensile_attivazioni_2025 >= 60
+    target_mensile_commodity: 80
+  - id: SILVER
+    condizione: media_mensile_attivazioni_2025 >= 30 AND media_mensile_attivazioni_2025
+      <= 59
+    target_mensile_commodity: 50
+  - id: BRONZE
+    condizione: media_mensile_attivazioni_2025 < 30
+    target_mensile_commodity: 30
+kpi:
+- id: luce_gas
+  descrizione: Contratto Luce o Gas residenziale
+- id: fibra
+  descrizione: Contratto Fibra
+- id: fotovoltaico
+  descrizione: Impianto fotovoltaico
+- id: wallbox
+  descrizione: Wallbox di ricarica
+- id: clima
+  descrizione: Climatizzatore
+meccaniche:
+- id: punti_luce_gas
+  tipo: punti_per_unita
+  kpi: luce_gas
+  punti: 10
+  cap_mensile_punti: 600
+  cap_mensile_punti_base: lordo_storni
+  fonte_clausola: art. 5.1, art. 5.6
+- id: punti_fibra
+  tipo: punti_per_unita
+  kpi: fibra
+  punti: 20
+  fonte_clausola: art. 5.2
+- id: punti_fotovoltaico
+  tipo: punti_per_unita
+  kpi: fotovoltaico
+  punti: 150
+  fonte_clausola: art. 5.3
+- id: punti_wallbox
+  tipo: punti_per_unita
+  kpi: wallbox
+  punti: 60
+  fonte_clausola: art. 5.4
+- id: punti_clima
+  tipo: punti_per_unita
+  kpi: clima
+  punti: 40
+  moltiplicatori:
+  - periodi:
+    - 2026-06
+    - 2026-07
+    fattore: 1.5
+    fonte_clausola: art. 6.3
+  fonte_clausola: art. 5.5
+- id: storni_generici
+  tipo: storno
+  regola: In caso di annullamento, recesso o mancata attivazione effettiva del contratto
+    entro 60 giorni, i punti corrispondenti saranno stornati dal saldo del PV, anche
+    in Mesi di Gara successivi a quello di maturazione.
+  fonte_clausola: art. 5.7
+  stato: da_verificare
+  motivo_escalation: La decorrenza dei '60 giorni' per lo storno non è specificata.
+    Non è chiaro se si riferisca alla data di firma del contratto, alla data di attivazione,
+    o ad altro evento.
+- id: bonus_obiettivo_mensile
+  tipo: bonus_condizionale
+  condizione: raggiungimento dell'obiettivo mensile di cluster di cui all'art. 4.1,
+    calcolato sulle attivazioni commodity al netto degli storni
+  punti: 200
+  ricorrenza: per_mese
+  liquidazione: solo_mese_concluso
+  fonte_clausola: art. 6.1, art. 6.4
+- id: bonus_tripletta
+  tipo: bonus_condizionale
+  condizione: nello stesso Mese di Gara realizzi almeno un fotovoltaico, una wallbox
+    e un climatizzatore
+  punti: 100
+  ricorrenza: per_mese
+  liquidazione: solo_mese_concluso
+  fonte_clausola: art. 6.2, art. 6.4
+classifica_finale:
+  ambito: per ciascun cluster
+  indice: totale dei punti maturati nei Mesi di Gara conclusi, rapportato all'obiettivo
+    mensile del cluster moltiplicato per il numero di Mesi di Gara conclusi
+  premi_punti_extra:
+  - posizione: 1
+    punti: 5000
+  - posizione: 2
+    punti: 3000
+  - posizione: 3
+    punti: 1500
+  fonte_clausola: art. 7.1, art. 7.2
+valorizzazione:
+  tasso_eur_per_punto: 0.25
+  catalogo: catalogo premi dedicato
+  accredito: con cadenza mensile, entro il giorno 10 del mese successivo al Mese di
+    Gara di riferimento, previa validazione dei dati da parte dell'Agenzia
+  fonte_clausola: art. 8.1, art. 8.2
+caricamenti:
+  flusso_prestazioni: mensilmente dal Promotore all'Agenzia entro il giorno 5 del
+    mese successivo al Mese di Gara di riferimento
+  finestra_contestazioni_giorni: 30
+  fonte_clausola: art. 9.1, art. 9.2
+clausole_da_verificare:
+- articolo: art. 5.7
+  dubbio: La decorrenza dei '60 giorni' per lo storno non è specificata. Non è chiaro
+    se si riferisca alla data di firma del contratto, alla data di attivazione, o
+    ad altro evento.

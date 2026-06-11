@@ -53,9 +53,26 @@ Poi apri:
 
 | Layer | Nel mockup |
 |---|---|
-| L1 Compilatore AI | **Simulato** (lo YAML è scritto a mano "come lo produrrebbe l'AI", con report di compilazione, confidence e clausole escalate a umano) |
+| L1 Compilatore AI | **Reale (v0)** — `mockup/01_contratto/compilatore.py`: legge il regolamento, chiama un LLM vero (Gemini via Vertex ADC, fallback Ollama), produce contratto YAML + report con confidenze, **si auto-verifica** contro il contratto approvato a mano. Primo run: 17/17 parametri conformi, escalation automatica dell'ambiguità all'art. 5.7 |
 | L2 Motore di calcolo | **Reale e deterministico** — riesegue davvero v1/v2, replay, riconciliazione |
 | L3 Ledger | **Reale** — eventi append-only in `output/ledger.jsonl` |
 | L4 API di serving | **Reale** — FastAPI su :8788 |
 | L5 Frontend | Demo visiva (HTML/JS, dati veri dall'API) |
-| L6 Control plane | Demo visiva (dati veri di riconciliazione/what-if/approvazioni) |
+| L6 Control plane | Demo visiva (dati veri di riconciliazione/what-if/approvazioni + banner compilazione AI) |
+
+## Compilazione AI reale (opzionale)
+
+```bash
+./run_demo.sh --ai          # demo completa, compilazione AI inclusa
+# oppure, solo la compilazione:
+venv/bin/python mockup/01_contratto/compilatore.py
+```
+
+Requisiti (uno dei due):
+- **Gemini via Vertex**: `.env` con `GOOGLE_CLOUD_PROJECT` + `GOOGLE_CLOUD_LOCATION` e
+  credenziali ADC gcloud già presenti sulla macchina (costo: centesimi a compilazione);
+- **Ollama locale**: servizio attivo con almeno un modello (`ollama pull llama3.1`).
+
+L'output va in `mockup/01_contratto/compilato_ai/` (contratto proposto, report, confronto
+col v1 approvato) e compare come banner nel backoffice → Compilazione. Il contratto AI
+**non** sostituisce mai il v1 approvato: nel sistema reale passerebbe dalla firma umana.
