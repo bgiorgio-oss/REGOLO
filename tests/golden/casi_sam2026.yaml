@@ -1,0 +1,164 @@
+# ============================================================================
+# GOLDEN TEST DI GARA — SAM2026
+# Casi limite derivati dal regolamento: input → punteggi attesi per meccanica.
+# Ogni caso viene eseguito su ENTRAMBI i motori (Python + ZEN/JDM): devono
+# coincidere tra loro e con l'atteso. È il collaudo che accompagnerà ogni
+# modifica di contratto/motore (pattern golden test, cfr. ROADMAP Blocco 1.2).
+#
+# Campi: contratto_v (1|2 — il runner verifica anche la coerenza con
+# l'effective dating del periodo), periodo, mese_concluso, target (cluster),
+# input (campi mancanti = 0), atteso {meccanica: punti}.
+# ============================================================================
+
+- nome: cap_esatto_v1
+  descrizione: "art. 5.1: 60 attivazioni × 10 = esattamente il cap 600"
+  contratto_v: 1
+  periodo: "2026-04"
+  mese_concluso: true
+  target: 80
+  input: { luce_gas: 60 }
+  atteso: { punti_commodity: 600 }
+
+- nome: cap_superato_v1
+  descrizione: "art. 5.1/5.6: 61 attivazioni → il cap blocca a 600"
+  contratto_v: 1
+  periodo: "2026-04"
+  mese_concluso: true
+  target: 80
+  input: { luce_gas: 61 }
+  atteso: { punti_commodity: 600 }
+
+- nome: cap_v2_sotto_soglia
+  descrizione: "rev.1 art. 5.1: a giugno il cap è 900 → 61 attivazioni pagano piene"
+  contratto_v: 2
+  periodo: "2026-06"
+  mese_concluso: false
+  target: 80
+  input: { luce_gas: 61 }
+  atteso: { punti_commodity: 610 }
+
+- nome: cap_v2_superato
+  descrizione: "rev.1 art. 5.1: 95 attivazioni → cap 900"
+  contratto_v: 2
+  periodo: "2026-06"
+  mese_concluso: false
+  target: 80
+  input: { luce_gas: 95 }
+  atteso: { punti_commodity: 900 }
+
+- nome: storni_fuori_cap
+  descrizione: "art. 5.6: cap sui lordi, storni sottratti interi fuori cap"
+  contratto_v: 1
+  periodo: "2026-04"
+  mese_concluso: true
+  target: 80
+  input: { luce_gas: 70, storni_luce_gas: 5 }
+  atteso: { punti_commodity: 600, storni: -50 }
+
+- nome: storni_misti_commodity_fibra
+  descrizione: "art. 5.7: storni commodity (10 pt) e fibra (20 pt) in un solo movimento"
+  contratto_v: 1
+  periodo: "2026-04"
+  mese_concluso: true
+  target: 80
+  input: { luce_gas: 10, fibra: 10, storni_luce_gas: 2, storni_fibra: 1 }
+  atteso: { punti_commodity: 100, punti_fibra: 200, storni: -40 }
+
+- nome: bonus_obiettivo_esatto
+  descrizione: "art. 6.1: nette = target esatto → bonus; il cap non c'entra col bonus"
+  contratto_v: 1
+  periodo: "2026-04"
+  mese_concluso: true
+  target: 80
+  input: { luce_gas: 80 }
+  atteso: { punti_commodity: 600, bonus_obiettivo_mensile: 200 }
+
+- nome: bonus_mancato_per_uno_storno
+  descrizione: "art. 6.1: il bonus si calcola al NETTO degli storni → 79 < 80"
+  contratto_v: 1
+  periodo: "2026-04"
+  mese_concluso: true
+  target: 80
+  input: { luce_gas: 80, storni_luce_gas: 1 }
+  atteso: { punti_commodity: 600, storni: -10 }
+
+- nome: bonus_obiettivo_bronze
+  descrizione: "art. 4.1/6.1: target BRONZE 30 → bonus scatta a volumi bassi"
+  contratto_v: 1
+  periodo: "2026-05"
+  mese_concluso: true
+  target: 30
+  input: { luce_gas: 30 }
+  atteso: { punti_commodity: 300, bonus_obiettivo_mensile: 200 }
+
+- nome: tripletta_completa
+  descrizione: "art. 6.2: 1 FV + 1 wallbox + 1 clima nello stesso mese → +100"
+  contratto_v: 1
+  periodo: "2026-04"
+  mese_concluso: true
+  target: 80
+  input: { fotovoltaico: 1, wallbox: 1, clima: 1 }
+  atteso: { punti_fotovoltaico: 150, punti_wallbox: 60, punti_clima: 40, bonus_tripletta: 100 }
+
+- nome: tripletta_incompleta
+  descrizione: "art. 6.2: senza wallbox niente tripletta, anche con 2 FV"
+  contratto_v: 1
+  periodo: "2026-04"
+  mese_concluso: true
+  target: 80
+  input: { fotovoltaico: 2, clima: 3 }
+  atteso: { punti_fotovoltaico: 300, punti_clima: 120 }
+
+- nome: mese_parziale_niente_bonus
+  descrizione: "art. 6.4: i bonus si liquidano solo a mese concluso, anche se nette >= target"
+  contratto_v: 2
+  periodo: "2026-06"
+  mese_concluso: false
+  target: 80
+  input: { luce_gas: 85, fotovoltaico: 1, wallbox: 1, clima: 1 }
+  atteso: { punti_commodity: 850, punti_fotovoltaico: 200, punti_wallbox: 60, punti_clima: 60 }
+
+- nome: clima_acceleratore_giugno
+  descrizione: "art. 6.3: a giugno il clima vale 40 × 1,5 = 60/unità"
+  contratto_v: 2
+  periodo: "2026-06"
+  mese_concluso: false
+  target: 80
+  input: { clima: 4 }
+  atteso: { punti_clima: 240 }
+
+- nome: clima_fuori_finestra
+  descrizione: "art. 6.3: ad aprile nessun acceleratore → 40/unità"
+  contratto_v: 1
+  periodo: "2026-04"
+  mese_concluso: true
+  target: 80
+  input: { clima: 4 }
+  atteso: { punti_clima: 160 }
+
+- nome: fotovoltaico_v1
+  descrizione: "art. 5.3: ad aprile il FV vale 150 (contratto v1)"
+  contratto_v: 1
+  periodo: "2026-04"
+  mese_concluso: true
+  target: 80
+  input: { fotovoltaico: 2 }
+  atteso: { punti_fotovoltaico: 300 }
+
+- nome: fotovoltaico_v2_effective_dating
+  descrizione: "rev.1 art. 5.3: a giugno il FV vale 200 (contratto v2)"
+  contratto_v: 2
+  periodo: "2026-06"
+  mese_concluso: false
+  target: 80
+  input: { fotovoltaico: 2 }
+  atteso: { punti_fotovoltaico: 400 }
+
+- nome: tutto_zero
+  descrizione: "nessuna prestazione → nessun evento, nessun punto"
+  contratto_v: 1
+  periodo: "2026-04"
+  mese_concluso: true
+  target: 80
+  input: {}
+  atteso: {}

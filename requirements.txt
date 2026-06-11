@@ -1,3 +1,10 @@
 fastapi>=0.110
 uvicorn>=0.29
 pyyaml>=6.0
+python-multipart>=0.0.9   # upload prestazioni (API)
+google-genai>=2.0         # compilatore L1 (Gemini via Vertex ADC)
+instructor>=1.15          # structured output con retry (decisione spike 2026-06-11)
+jsonref>=1.1              # richiesto dall'integrazione instructor/genai
+pypdf>=5.0                # regolamenti in PDF
+python-docx>=1.1          # regolamenti in DOCX
+zen-engine>=0.53          # motore regole JDM (decisione spike 2026-06-11)

@@ -1,36 +1,41 @@
 #!/usr/bin/env python3
 """
-REGOLO — COMPILATORE DI REGOLAMENTI (L1) — v0, AI REALE.
+REGOLO — COMPILATORE DI REGOLAMENTI (L1) — v0.2, AI reale + schema Pydantic.
 
-Legge il regolamento (testo), chiama un LLM vero e produce:
-  compilato_ai/gara_compilata_ai.yaml      il Contratto di Gara proposto dall'AI
-  compilato_ai/compilazione_report_ai.json il report clausola per clausola (confidenze,
-                                           escalation) + metadati del run (modello, token)
-  compilato_ai/confronto_v1.json           auto-verifica: parametri estratti dall'AI vs
-                                           contratto v1 approvato a mano (ground truth)
+Novità v0.2 (decisioni dagli spike del 2026-06-11):
+  * struttura imposta dallo schema Pydantic (`schema_contratto.py`), non descritta
+    nel prompt — validatori di business inclusi (coerenza checklist↔escalation)
+  * chiamata via INSTRUCTOR (`instructor.from_genai`) con retry automatici sugli
+    errori di validazione — scelto sul `response_schema` nativo perché preserva
+    le escalation di ambiguità (vedi spikes/instructor/RISULTATO.md)
+  * input anche PDF e DOCX: i regolamenti reali si caricano direttamente
 
-Provider (auto-detect): Gemini via Vertex AI ADC (come da .env) → fallback Ollama locale.
-L'LLM lavora SOLO qui, a compile-time: il motore (L2) resta deterministico.
+Output in compilato_ai/:
+  gara_compilata_ai.yaml        contratto proposto (in attesa di firma umana)
+  compilazione_report_ai.json   report clausole + checklist + metadati run
+  confronto_v1.json             auto-verifica vs contratto v1 approvato (se presente)
 
 Uso:
   venv/bin/python mockup/01_contratto/compilatore.py
-  venv/bin/python mockup/01_contratto/compilatore.py --regolamento altro.md --provider ollama
+  venv/bin/python mockup/01_contratto/compilatore.py --regolamento percorso.pdf
+  venv/bin/python mockup/01_contratto/compilatore.py --provider ollama
 """
 
 import argparse
 import json
-import re
+import sys
 import time
-import urllib.request
 from pathlib import Path
 
 import yaml
+
+sys.path.insert(0, str(Path(__file__).parent))
+from schema_contratto import SOGLIA_CONFIDENZA, Compilazione  # noqa: E402
 
 QUI = Path(__file__).parent
 ROOT = QUI.parent.parent
 REGOLAMENTO_DEFAULT = QUI.parent / "00_regolamento" / "REGOLAMENTO_SPAZIO_ALLA_META_2026.md"
 OUT = QUI / "compilato_ai"
-SOGLIA_CONFIDENZA = 0.80
 
 
 def carica_env() -> dict:
@@ -47,77 +52,52 @@ def carica_env() -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Prompt — schema astratto, con esempio generico (NESSUN numero della gara:
-# il modello deve estrarre tutto dal regolamento, l'auto-verifica è a valle)
+# Estrazione testo: i regolamenti veri arrivano in PDF/DOCX
 # ---------------------------------------------------------------------------
 
-PROMPT = """Sei il Compilatore di Regolamenti di REGOLO, il sistema loyalty di H&A Motivation.
-Trasformi il regolamento di un'operazione a premi in un "Contratto di Gara": una specifica
+def estrai_testo(percorso: Path) -> str:
+    suffisso = percorso.suffix.lower()
+    if suffisso in (".md", ".txt"):
+        return percorso.read_text()
+    if suffisso == ".pdf":
+        from pypdf import PdfReader
+        pagine = [p.extract_text() or "" for p in PdfReader(str(percorso)).pages]
+        return "\n\n".join(pagine)
+    if suffisso == ".docx":
+        import docx
+        d = docx.Document(str(percorso))
+        blocchi = [p.text for p in d.paragraphs]
+        for tabella in d.tables:  # le tabelle (cluster, premi) sono spesso decisive
+            for riga in tabella.rows:
+                blocchi.append(" | ".join(c.text.strip() for c in riga.cells))
+        return "\n".join(blocchi)
+    raise SystemExit(f"formato non supportato: {suffisso} (attesi: .md .txt .pdf .docx)")
+
+
+# ---------------------------------------------------------------------------
+# Prompt: SOLO regole e checklist — la struttura la impone lo schema Pydantic
+# ---------------------------------------------------------------------------
+
+PROMPT = """Sei il Compilatore di Regolamenti di REGOLO (sistema loyalty di H&A Motivation).
+Trasformi il regolamento di un'operazione a premi in un Contratto di Gara: una specifica
 strutturata ed ESEGUIBILE da un motore di calcolo deterministico.
 
 REGOLE TASSATIVE:
 1. Estrai SOLO ciò che il regolamento dice. Non inventare valori, non "completare" regole.
-2. Ogni elemento del contratto cita la clausola di origine in `fonte_clausola` (es. "art. 5.1").
-3. Per ogni clausola interpretata compila una voce di report con `confidenza` (0.0–1.0).
-4. Se una clausola è AMBIGUA: NON scegliere tu un'interpretazione. Metti
-   `stato: "da_verificare"`, confidenza < 0.8, spiega il dubbio in `motivo_escalation`
-   e aggiungi la voce anche in `contratto.clausole_da_verificare`.
-4-bis. CHECKLIST AMBIGUITÀ — verificala voce per voce, è il tuo compito più importante
-   (errori qui muovono denaro). Per OGNI clausola chiediti:
-   a) finestre temporali ("entro N giorni/mesi"): la DECORRENZA è specificata
-      (da firma? da attivazione? da caricamento dati?)? Se non lo è → da_verificare.
-   b) bonus e premi: è ESPLICITO se sono una tantum o ricorrenti (per ogni mese/periodo)?
-      Se il testo non lo dichiara → da_verificare.
-   c) cap e massimali: è chiaro se si applicano al lordo o al netto degli storni?
-   d) condizioni e formule: tutte le grandezze citate sono definite (netto/lordo,
-      arrotondamenti, periodo di riferimento)?
-   e) termini vaghi ("adeguato", "regolare", "può essere aggiornato"): hanno effetti
-      sul calcolo? Se sì → da_verificare.
-   Un'interpretazione "ragionevole ma non scritta" è un ERRORE, non un servizio.
-5. Usa id in snake_case. Per i KPI usa nomi brevi derivati dal prodotto
-   (es. luce_gas, fibra, fotovoltaico, wallbox, clima).
-6. Date in formato ISO (YYYY-MM-DD), mesi come "YYYY-MM". Numeri come numeri, non stringhe.
-7. Rispondi SOLO con un oggetto JSON valido, nessun testo fuori dal JSON.
-
-STRUTTURA DEL JSON DI RISPOSTA (i valori dell'esempio sono FITTIZI e generici):
-{
-  "contratto": {
-    "meta": {"gara": "...", "codice": "...", "contratto_versione": 1,
-             "valido_dal": "YYYY-MM-DD", "valido_al": "YYYY-MM-DD"},
-    "destinatari": {"tipo": "...", "requisiti": "...", "fonte_clausola": "..."},
-    "cluster": {"criterio": "...", "fonte_clausola": "...",
-      "definizioni": [{"id": "ALFA", "condizione": "...", "target_mensile_commodity": 99}]},
-    "kpi": [{"id": "vendita_x", "descrizione": "..."}],
-    "meccaniche": [
-      {"id": "punti_vendita_x", "tipo": "punti_per_unita", "kpi": "vendita_x", "punti": 5,
-       "cap_mensile_punti": 999, "fonte_clausola": "..."},
-      {"id": "punti_y", "tipo": "punti_per_unita", "kpi": "y", "punti": 7,
-       "moltiplicatori": [{"periodi": ["YYYY-MM"], "fattore": 2.0, "fonte_clausola": "..."}],
-       "fonte_clausola": "..."},
-      {"id": "storni", "tipo": "storno", "regola": "...", "fonte_clausola": "..."},
-      {"id": "bonus_esempio", "tipo": "bonus_condizionale", "condizione": "...",
-       "punti": 50, "ricorrenza": "per_mese", "liquidazione": "solo_mese_concluso",
-       "fonte_clausola": "..."}
-    ],
-    "classifica_finale": {"ambito": "...", "indice": "...",
-      "premi_punti_extra": [{"posizione": 1, "punti": 999}], "fonte_clausola": "..."},
-    "valorizzazione": {"tasso_eur_per_punto": 0.5, "catalogo": "...",
-      "accredito": "...", "fonte_clausola": "..."},
-    "caricamenti": {"flusso_prestazioni": "...", "finestra_contestazioni_giorni": 99,
-      "fonte_clausola": "..."},
-    "clausole_da_verificare": [{"articolo": "...", "dubbio": "..."}]
-  },
-  "report": {
-    "clausole": [
-      {"id": "C01", "articolo": "art. X", "testo_estratto": "...",
-       "interpretazione": "...", "campo_contratto": "...",
-       "confidenza": 0.97, "stato": "auto"},
-      {"id": "C02", "articolo": "art. Y", "testo_estratto": "...",
-       "interpretazione": "AMBIGUO: ...", "campo_contratto": "...",
-       "confidenza": 0.55, "stato": "da_verificare", "motivo_escalation": "..."}
-    ]
-  }
-}
+2. Ogni elemento del contratto cita la clausola di origine in fonte_clausola (es. "art. 5.1").
+3. Per ogni clausola interpretata, una voce di report con confidenza 0.0-1.0.
+4. CHECKLIST AMBIGUITÀ — è il tuo compito più importante (errori qui muovono denaro).
+   Percorri i 5 controlli uno per uno e registra l'esito:
+   a) decorrenze_finestre_temporali: per ogni "entro N giorni/mesi", la decorrenza è
+      specificata (firma? attivazione? caricamento)? Se no → ambiguita_trovata.
+   b) ricorrenza_bonus: per ogni bonus/premio, è ESPLICITO se una tantum o ricorrente?
+   c) cap_lordo_o_netto: i massimali si applicano al lordo o al netto degli storni?
+   d) grandezze_definite: tutte le grandezze citate in condizioni/formule sono definite?
+   e) termini_vaghi: termini vaghi con effetti sul calcolo?
+   Ogni ambiguità trovata va anche: nel report come clausola stato "da_verificare" con
+   motivo_escalation, e in contratto.clausole_da_verificare. Un'interpretazione
+   "ragionevole ma non scritta" è un ERRORE, non un servizio.
+5. Date ISO (YYYY-MM-DD), mesi "YYYY-MM", numeri come numeri.
 
 REGOLAMENTO DA COMPILARE:
 ----------------------------------------
@@ -129,37 +109,54 @@ REGOLAMENTO DA COMPILARE:
 # Provider LLM
 # ---------------------------------------------------------------------------
 
-def chiama_gemini(prompt: str, env: dict) -> tuple[str, dict]:
+def chiama_gemini(prompt: str, env: dict) -> tuple[Compilazione, dict]:
+    """Gemini via Vertex ADC, con instructor: schema + retry automatici."""
+    import instructor
     from google import genai
-    from google.genai import types
-    client = genai.Client(vertexai=True, project=env["GOOGLE_CLOUD_PROJECT"],
-                          location=env.get("GOOGLE_CLOUD_LOCATION", "us-central1"))
+    gclient = genai.Client(vertexai=True, project=env["GOOGLE_CLOUD_PROJECT"],
+                           location=env.get("GOOGLE_CLOUD_LOCATION", "us-central1"))
+    client = instructor.from_genai(gclient)
     modello = env.get("REGOLO_MODEL", "gemini-2.5-flash")
     t0 = time.time()
-    resp = client.models.generate_content(
-        model=modello, contents=prompt,
-        config=types.GenerateContentConfig(temperature=0.0,
-                                           response_mime_type="application/json"))
-    um = resp.usage_metadata
-    meta = dict(provider="gemini-vertex", modello=modello, durata_s=round(time.time() - t0, 1),
-                token_input=um.prompt_token_count, token_output=um.candidates_token_count)
-    return resp.text, meta
+    risultato, raw = client.chat.completions.create_with_completion(
+        model=modello,
+        messages=[{"role": "user", "content": prompt}],
+        response_model=Compilazione,
+        max_retries=2)
+    um = getattr(raw, "usage_metadata", None)
+    meta = dict(provider="gemini-vertex (instructor)", modello=modello,
+                durata_s=round(time.time() - t0, 1),
+                token_input=getattr(um, "prompt_token_count", None),
+                token_output=getattr(um, "candidates_token_count", None))
+    return risultato, meta
 
 
-def chiama_ollama(prompt: str, env: dict) -> tuple[str, dict]:
+def chiama_ollama(prompt: str, env: dict) -> tuple[Compilazione, dict]:
+    """Fallback locale: schema JSON nel prompt + validazione Pydantic (2 tentativi)."""
+    import urllib.request
     modello = env.get("REGOLO_MODEL_OLLAMA", "llama3.1")
-    corpo = json.dumps(dict(model=modello, prompt=prompt, stream=False, format="json",
-                            options=dict(temperature=0))).encode()
-    t0 = time.time()
-    req = urllib.request.Request("http://localhost:11434/api/generate", data=corpo,
-                                 headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=600) as r:
-        dati = json.loads(r.read())
-    meta = dict(provider="ollama", modello=modello, durata_s=round(time.time() - t0, 1))
-    return dati["response"], meta
+    schema = json.dumps(Compilazione.model_json_schema(), ensure_ascii=False)
+    contents = prompt + ("\n\nRispondi SOLO con un oggetto JSON valido conforme a questo "
+                         f"JSON Schema:\n{schema}")
+    t0, errore = time.time(), ""
+    for _ in range(2):
+        corpo = json.dumps(dict(model=modello, prompt=contents + errore, stream=False,
+                                format="json", options=dict(temperature=0))).encode()
+        req = urllib.request.Request("http://localhost:11434/api/generate", data=corpo,
+                                     headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=900) as r:
+            grezzo = json.loads(r.read())["response"]
+        try:
+            ris = Compilazione.model_validate_json(grezzo)
+            return ris, dict(provider="ollama", modello=modello,
+                             durata_s=round(time.time() - t0, 1))
+        except Exception as e:
+            errore = f"\n\nIl tuo output precedente non valida: {str(e)[:300]}. Correggi."
+    raise RuntimeError("Ollama: validazione fallita dopo 2 tentativi")
 
 
 def ollama_disponibile() -> bool:
+    import urllib.request
     try:
         with urllib.request.urlopen("http://localhost:11434/api/tags", timeout=3) as r:
             return len(json.loads(r.read()).get("models", [])) > 0
@@ -167,21 +164,11 @@ def ollama_disponibile() -> bool:
         return False
 
 
-def estrai_json(testo: str) -> dict:
-    """Tollerante alle fence ```json eventualmente aggiunte dal modello."""
-    testo = testo.strip()
-    m = re.search(r"```(?:json)?\s*(.+?)```", testo, re.DOTALL)
-    if m:
-        testo = m.group(1)
-    return json.loads(testo)
-
-
 # ---------------------------------------------------------------------------
 # Auto-verifica: parametri AI vs contratto v1 approvato (ground truth)
+# (funzioni riusate anche dagli spike — non cambiarne le firme)
 # ---------------------------------------------------------------------------
 
-# sinonimi di naming tra compilazioni diverse (l'AI può chiamare "commodity"
-# ciò che il contratto approvato chiama "luce_gas"): il confronto è semantico
 SINONIMI_KPI = {
     "luce_gas": ["luce_gas", "commodity", "luce", "gas"],
     "fibra": ["fibra"],
@@ -192,8 +179,7 @@ SINONIMI_KPI = {
 
 
 def _mecc_per_kpi(contratto: dict, kpi: str) -> dict | None:
-    nomi = SINONIMI_KPI.get(kpi, [kpi])
-    for nome in nomi:
+    for nome in SINONIMI_KPI.get(kpi, [kpi]):
         for m in contratto.get("meccaniche", []):
             if m.get("kpi") == nome or nome in str(m.get("id", "")).lower():
                 return m
@@ -247,13 +233,15 @@ def estrai_parametri(c: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="REGOLO — Compilatore L1 (AI reale)")
-    ap.add_argument("--regolamento", default=str(REGOLAMENTO_DEFAULT))
+    ap = argparse.ArgumentParser(description="REGOLO — Compilatore L1 v0.2 (AI + schema Pydantic)")
+    ap.add_argument("--regolamento", default=str(REGOLAMENTO_DEFAULT),
+                    help="percorso .md/.txt/.pdf/.docx")
     ap.add_argument("--provider", choices=["auto", "gemini", "ollama"], default="auto")
     args = ap.parse_args()
 
     env = carica_env()
-    testo = Path(args.regolamento).read_text()
+    percorso = Path(args.regolamento)
+    testo = estrai_testo(percorso)
     prompt = PROMPT.replace("{REGOLAMENTO}", testo)
 
     provider = args.provider
@@ -267,58 +255,58 @@ def main() -> None:
             raise SystemExit("Nessun provider LLM disponibile: configurare Vertex ADC nel .env "
                              "o avviare Ollama con un modello installato.")
 
-    print(f"▸ Compilo «{Path(args.regolamento).name}» con provider: {provider}…")
-    grezzo, meta = (chiama_gemini if provider == "gemini" else chiama_ollama)(prompt, env)
-    risultato = estrai_json(grezzo)
-    contratto, report = risultato["contratto"], risultato["report"]
+    print(f"▸ Compilo «{percorso.name}» ({len(testo)} caratteri) con provider: {provider}…")
+    risultato, meta = (chiama_gemini if provider == "gemini" else chiama_ollama)(prompt, env)
+    contratto = risultato.contratto.model_dump(exclude_none=True)
+    clausole = [c.model_dump() for c in risultato.report]
+    checklist = [v.model_dump() for v in risultato.checklist_ambiguita]
 
     OUT.mkdir(exist_ok=True)
-    (OUT / "raw_response.json").write_text(grezzo)
     with open(OUT / "gara_compilata_ai.yaml", "w") as f:
         f.write("# Contratto di Gara PROPOSTO DALL'AI — in attesa di review e approvazione umana.\n"
                 f"# Generato da: {meta['provider']} / {meta['modello']} — NON usato dal motore\n"
                 "# finché non viene approvato (HITL).\n")
         yaml.dump(contratto, f, allow_unicode=True, sort_keys=False)
 
-    # escalation: clausole sotto soglia o marcate dal modello
-    da_verificare = [c for c in report.get("clausole", [])
-                     if c.get("stato") == "da_verificare" or c.get("confidenza", 1) < SOGLIA_CONFIDENZA]
+    da_verificare = [c for c in clausole if c["stato"] == "da_verificare"]
     report_completo = dict(
-        _descrizione="Report di compilazione PRODOTTO DALL'AI (L1 reale, v0)",
-        documento_fonte=Path(args.regolamento).name, esecuzione=meta,
+        _descrizione="Report di compilazione PRODOTTO DALL'AI (L1 v0.2: Pydantic + instructor)",
+        documento_fonte=percorso.name, esecuzione=meta,
         soglia_confidenza=SOGLIA_CONFIDENZA,
-        statistiche=dict(clausole_analizzate=len(report.get("clausole", [])),
+        statistiche=dict(clausole_analizzate=len(clausole),
                          escalation_verifica_umana=len(da_verificare)),
-        clausole=report.get("clausole", []))
+        checklist_ambiguita=checklist, clausole=clausole)
     (OUT / "compilazione_report_ai.json").write_text(
         json.dumps(report_completo, ensure_ascii=False, indent=1))
 
-    # ----- auto-verifica vs contratto approvato -----------------------------
-    with open(QUI / "gara_spazio_alla_meta.v1.yaml") as f:
-        v1 = yaml.safe_load(f)
-    p_v1, p_ai = estrai_parametri(v1), estrai_parametri(contratto)
-    confronto = [dict(parametro=k, approvato_v1=p_v1[k], proposto_ai=p_ai.get(k),
-                      esito="OK" if p_ai.get(k) == p_v1[k] else "DIFF") for k in p_v1]
-    conformi = sum(1 for r in confronto if r["esito"] == "OK")
-    (OUT / "confronto_v1.json").write_text(json.dumps(dict(
-        descrizione="Auto-verifica: parametri della compilazione AI vs contratto v1 approvato",
-        conformi=conformi, totale=len(confronto), esecuzione=meta,
-        righe=confronto), ensure_ascii=False, indent=1))
+    # ----- auto-verifica vs contratto approvato (solo per la gara del mockup) ----
+    v1_path = QUI / "gara_spazio_alla_meta.v1.yaml"
+    if v1_path.exists() and percorso == REGOLAMENTO_DEFAULT:
+        with open(v1_path) as f:
+            v1 = yaml.safe_load(f)
+        p_v1, p_ai = estrai_parametri(v1), estrai_parametri(contratto)
+        confronto = [dict(parametro=k, approvato_v1=p_v1[k], proposto_ai=p_ai.get(k),
+                          esito="OK" if p_ai.get(k) == p_v1[k] else "DIFF") for k in p_v1]
+        conformi = sum(1 for r in confronto if r["esito"] == "OK")
+        (OUT / "confronto_v1.json").write_text(json.dumps(dict(
+            descrizione="Auto-verifica: parametri della compilazione AI vs contratto v1 approvato",
+            conformi=conformi, totale=len(confronto), esecuzione=meta,
+            righe=confronto), ensure_ascii=False, indent=1))
+        print(f"\n  AUTO-VERIFICA — parametri vs contratto v1 approvato: {conformi}/{len(confronto)}")
+        for r in confronto:
+            segno = "✓" if r["esito"] == "OK" else "✗"
+            extra = "" if r["esito"] == "OK" else f"   (AI: {r['proposto_ai']} | v1: {r['approvato_v1']})"
+            print(f"   {segno} {r['parametro']}{extra}")
 
-    # ----- esito a console ----------------------------------------------------
-    print(f"✓ Compilazione completata in {meta['durata_s']}s "
+    print(f"\n✓ Compilazione in {meta['durata_s']}s "
           f"({meta.get('token_input', '?')} token in / {meta.get('token_output', '?')} out)")
-    print(f"\n  AUTO-VERIFICA — parametri vs contratto v1 approvato: {conformi}/{len(confronto)} conformi")
-    for r in confronto:
-        segno = "✓" if r["esito"] == "OK" else "✗"
-        extra = "" if r["esito"] == "OK" else f"   (AI: {r['proposto_ai']} | v1: {r['approvato_v1']})"
-        print(f"   {segno} {r['parametro']}{extra}")
-    print(f"\n  ESCALATION A VERIFICA UMANA: {len(da_verificare)} clausole")
+    print(f"  Checklist ambiguità: {sum(1 for v in checklist if v['esito'] == 'ambiguita_trovata')} "
+          f"ambiguità trovate su {len(checklist)} controlli")
+    print(f"  ESCALATION A VERIFICA UMANA: {len(da_verificare)} clausole")
     for c in da_verificare:
-        print(f"   ⚠ {c.get('articolo', '?')} (conf. {c.get('confidenza', '?')}): "
-              f"{c.get('motivo_escalation') or c.get('interpretazione', '')[:110]}")
-    print(f"\n  Output in {OUT.relative_to(ROOT)}/ — il contratto AI NON sostituisce il v1")
-    print("  approvato: nel sistema reale passerebbe ora dalla review umana (HITL).")
+        print(f"   ⚠ {c['articolo']} (conf. {c['confidenza']}): "
+              f"{(c.get('motivo_escalation') or c['interpretazione'])[:110]}")
+    print(f"\n  Output in {OUT.relative_to(ROOT)}/ — il contratto AI passa ora dalla review umana (HITL).")
 
 
 if __name__ == "__main__":

@@ -23,6 +23,19 @@ sul Desktop («REGOLO - Piano Operativo Fasi.html»).*
   proprio di REGOLO — 17/17 parametri conformi al contratto approvato, escalation
   automatica dell'ambiguità art. 5.7 (decorrenza storni) grazie alla checklist ambiguità
   nel prompt; banner risultati nel backoffice; `./run_demo.sh --ai`
+- ✅ **Compilatore v0.2** (2026-06-11): schema Pydantic condiviso (`schema_contratto.py`)
+  + instructor con retry + **input PDF/DOCX** (pronto per i regolamenti reali). Run di
+  verifica: 17/17 + escalation art. 9.2 ("dalla pubblicazione": decorrenza vaga — vera).
+  Nota: la rilevazione ambiguità varia da run a run (5.7 vs 9.2) → in Fase 1 servono
+  più passaggi/doppio modello con unione delle escalation
+- ✅ **Golden test harness a doppio motore** (2026-06-11): `tests/golden/` — 17 casi
+  limite da regolamento (cap esatto/superato, storni fuori cap, bonus al netto, tripletta,
+  mese parziale, effective dating v1/v2) eseguiti su motore Python E ZEN/JDM: **17/17
+  verdi su entrambi**. È il collaudo che accompagnerà ogni modifica
+- ✅ **Decisione ledger L3** (2026-06-11): Fase 1 = tabella append-only SQLite fatta in
+  casa (WAL, trigger anti-UPDATE/DELETE, storni compensativi); Fase 2+ = stessa tabella
+  su Postgres; Formance solo se servirà double-entry vero. Fatti e fonti:
+  `docs/DECISIONE_LEDGER.md`
 
 **Uscita fase**: decisione go/no-go interna → 🤝 presentare la demo e decidere
 
@@ -65,7 +78,8 @@ PIATTAFORMA, su una gara vera già attiva.
   (`spikes/zen/RISULTATO.md`). Decisione: in Fase 1 L2 = ZEN + nostro layer effective
   dating/replay; il motore Python del mockup resta come doppio controllo (golden test)
 - ⬜ Adattare il motore alle meccaniche del contratto pilota (parametrico, zero hardcode)
-- ⬜ Ledger su DB (SQLite per la fase 1 basta) + run replay-abili
+- ⬜ Ledger su DB: **deciso** — tabella append-only SQLite (schema in
+  `docs/DECISIONE_LEDGER.md`) + run replay-abili
 - ⬜ Job notturno di riconciliazione: REGOLO vs export piattaforma, con diagnosi automatica
 - ⬜ Report divergenze leggibile (riusare la vista backoffice del mockup)
 
@@ -110,3 +124,5 @@ PIATTAFORMA, su una gara vera già attiva.
 | 2026-06-10 | Frontend: sviluppo interno confermato |
 | 2026-06-11 | Motore L2 in Fase 1 = GoRules ZEN Engine (JDM) + nostro layer effective dating/replay — validato da spike con equivalenza 392/392 vs motore proprio |
 | 2026-06-11 | Compilatore L1 in Fase 1 = schema Pydantic + instructor (NON response_schema nativo: il constrained decoding sopprime le escalation di ambiguità — vedi spike) |
+| 2026-06-11 | Ledger L3 = tabella append-only fatta in casa (SQLite → Postgres); niente Formance/Blnk/TigerBeetle in Fase 1 — `docs/DECISIONE_LEDGER.md` |
+| 2026-06-11 | La rilevazione ambiguità del compilatore varia tra run: in Fase 1 escalation = UNIONE di più passaggi/modelli, mai un run singolo |

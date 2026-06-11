@@ -3,41 +3,41 @@
  "conformi": 17,
  "totale": 17,
  "esecuzione": {
-  "provider": "gemini-vertex",
+  "provider": "gemini-vertex (instructor)",
   "modello": "gemini-2.5-flash",
-  "durata_s": 48.4,
-  "token_input": 3164,
-  "token_output": 7807
+  "durata_s": 78.3,
+  "token_input": 2909,
+  "token_output": 3928
  },
  "righe": [
   {
    "parametro": "punti_luce_gas",
    "approvato_v1": 10,
-   "proposto_ai": 10,
+   "proposto_ai": 10.0,
    "esito": "OK"
   },
   {
    "parametro": "punti_fibra",
    "approvato_v1": 20,
-   "proposto_ai": 20,
+   "proposto_ai": 20.0,
    "esito": "OK"
   },
   {
    "parametro": "punti_fotovoltaico",
    "approvato_v1": 150,
-   "proposto_ai": 150,
+   "proposto_ai": 150.0,
    "esito": "OK"
   },
   {
    "parametro": "punti_wallbox",
    "approvato_v1": 60,
-   "proposto_ai": 60,
+   "proposto_ai": 60.0,
    "esito": "OK"
   },
   {
    "parametro": "punti_clima",
    "approvato_v1": 40,
-   "proposto_ai": 40,
+   "proposto_ai": 40.0,
    "esito": "OK"
   },
   {
@@ -67,13 +67,13 @@
   {
    "parametro": "bonus_obiettivo",
    "approvato_v1": 200,
-   "proposto_ai": 200,
+   "proposto_ai": 200.0,
    "esito": "OK"
   },
   {
    "parametro": "bonus_tripletta",
    "approvato_v1": 100,
-   "proposto_ai": 100,
+   "proposto_ai": 100.0,
    "esito": "OK"
   },
   {
