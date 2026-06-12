@@ -102,14 +102,16 @@ class ClausolaDaVerificare(BaseModel):
 
 
 class Contratto(BaseModel):
+    """Le sezioni opzionali vanno lasciate null se il regolamento NON le prevede:
+    inventarle per riempire lo schema è un errore grave (regola tassativa n.1)."""
     meta: Meta
     destinatari: Destinatari
-    cluster: Cluster
     kpi: list[Kpi]
     meccaniche: list[Meccanica]
-    classifica_finale: ClassificaFinale
-    valorizzazione: Valorizzazione
-    caricamenti: Caricamenti
+    cluster: Cluster | None = Field(None, description="null se la gara non ha cluster/segmenti")
+    classifica_finale: ClassificaFinale | None = Field(None, description="null se non c'è classifica")
+    valorizzazione: Valorizzazione | None = Field(None, description="null se i punti non hanno controvalore dichiarato")
+    caricamenti: Caricamenti | None = Field(None, description="null se il regolamento non disciplina i flussi dati")
     clausole_da_verificare: list[ClausolaDaVerificare] = []
 
 

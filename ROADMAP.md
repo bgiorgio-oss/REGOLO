@@ -47,7 +47,20 @@ Obiettivo: dimostrare l'affidabilità del calcolo a **rischio zero**, in paralle
 PIATTAFORMA, su una gara vera già attiva.
 
 ### Blocco 1.1 — Setup e materiale (settimane 1–2)
-- 🤝 Scegliere la **gara pilota** — candidati trovati via MAGI (2026-06-11):
+- ✅ **Gara pilota CONFERMATA** (Giorgio, 2026-06-12): «Enel Energy Rewards – Agenzie B2B –
+  1° Sem. 2026». PDF completo scaricato in `gare/energy_rewards_b2b_2026_s1/` (gitignored:
+  documenti cliente mai in git) usando la sessione Drive già autorizzata (one-off)
+- ✅ **Prima compilazione AI di un regolamento REALE** (2026-06-12): 67s, tabella punti
+  per fasce kW/G-class estratta con fonte_clausola, cluster/classifica correttamente
+  lasciati null (non presenti nel regolamento), **8 escalation di qualità** tra cui:
+  tasso €/punto inferito e autodenunciato (conf. 0.1), finestra contestazioni inferita,
+  e **primo gap di schema reale: meccanica "riaccredito punti" non modellata**
+  → ⚠ richiede la review umana di Giorgio (HITL): numeri da validare sul PDF
+- ⬜ Estendere lo schema: meccanica `riaccredito`, fasce/scaglioni come struttura nativa
+  (oggi appiattite in una meccanica per fascia), campo `codice` opzionale
+- ⬜ Credenziali Drive PROPRIE di REGOLO (OAuth o service account sul nuovo progetto):
+  il recupero one-off non è il pattern di Fase 1
+- 🤝 Candidati trovati via MAGI (2026-06-11) per i regolamenti aggiuntivi:
   1. **«Enel Energy Rewards – Agenzie B2B – 1° Sem. 2026»** (`REGOLAMENTO DI
      PARTECIPAZIONE.pdf`, Drive ID `1GTobn8jDsniOzEbDzEikkeIQaU59lmB4`) — gara **in corso**
      (01/02→30/06/2026): pilota ideale. Nota MAGI: allegato premi/meccanica online, serve
@@ -64,8 +77,10 @@ PIATTAFORMA, su una gara vera già attiva.
 - ⬜ Estendere lo **schema del Contratto di Gara** alle meccaniche reali incontrate
   (gare a obiettivo, classifiche, raccolte punti, instant win, …)
 - ✅ Dove gira la Fase 1: **Cloud Run su progetto GCP nuovo e separato** (deciso da
-  Giorgio 2026-06-11). Setup pronto: `infra/setup_gcp.sh` (richiede `gcloud auth login`
-  interattivo — non tocca l'ADC condiviso con MAGI)
+  Giorgio 2026-06-11). ✅ **FATTO il 2026-06-12 via API**: progetto `regolo-loyalty-hma`
+  creato, billing collegato, API abilitate (aiplatform, run, secretmanager), `.env`
+  aggiornato, Vertex verificato sul nuovo progetto. L'ADC condiviso con MAGI NON è stato
+  toccato (progetto sempre passato esplicitamente)
 
 ### Blocco 1.2 — Compilatore v1 (settimane 3–4)
 - ⬜ Pipeline compilazione: estrazione testo (PDF/DOCX) → structured output su schema →

@@ -237,7 +237,9 @@ def main() -> None:
     ap.add_argument("--regolamento", default=str(REGOLAMENTO_DEFAULT),
                     help="percorso .md/.txt/.pdf/.docx")
     ap.add_argument("--provider", choices=["auto", "gemini", "ollama"], default="auto")
+    ap.add_argument("--out", default=str(OUT), help="cartella di output (default: compilato_ai del mockup)")
     args = ap.parse_args()
+    out = Path(args.out)
 
     env = carica_env()
     percorso = Path(args.regolamento)
@@ -261,8 +263,8 @@ def main() -> None:
     clausole = [c.model_dump() for c in risultato.report]
     checklist = [v.model_dump() for v in risultato.checklist_ambiguita]
 
-    OUT.mkdir(exist_ok=True)
-    with open(OUT / "gara_compilata_ai.yaml", "w") as f:
+    out.mkdir(parents=True, exist_ok=True)
+    with open(out / "gara_compilata_ai.yaml", "w") as f:
         f.write("# Contratto di Gara PROPOSTO DALL'AI — in attesa di review e approvazione umana.\n"
                 f"# Generato da: {meta['provider']} / {meta['modello']} — NON usato dal motore\n"
                 "# finché non viene approvato (HITL).\n")
@@ -276,7 +278,7 @@ def main() -> None:
         statistiche=dict(clausole_analizzate=len(clausole),
                          escalation_verifica_umana=len(da_verificare)),
         checklist_ambiguita=checklist, clausole=clausole)
-    (OUT / "compilazione_report_ai.json").write_text(
+    (out / "compilazione_report_ai.json").write_text(
         json.dumps(report_completo, ensure_ascii=False, indent=1))
 
     # ----- auto-verifica vs contratto approvato (solo per la gara del mockup) ----
@@ -288,7 +290,7 @@ def main() -> None:
         confronto = [dict(parametro=k, approvato_v1=p_v1[k], proposto_ai=p_ai.get(k),
                           esito="OK" if p_ai.get(k) == p_v1[k] else "DIFF") for k in p_v1]
         conformi = sum(1 for r in confronto if r["esito"] == "OK")
-        (OUT / "confronto_v1.json").write_text(json.dumps(dict(
+        (out / "confronto_v1.json").write_text(json.dumps(dict(
             descrizione="Auto-verifica: parametri della compilazione AI vs contratto v1 approvato",
             conformi=conformi, totale=len(confronto), esecuzione=meta,
             righe=confronto), ensure_ascii=False, indent=1))
@@ -306,7 +308,7 @@ def main() -> None:
     for c in da_verificare:
         print(f"   ⚠ {c['articolo']} (conf. {c['confidenza']}): "
               f"{(c.get('motivo_escalation') or c['interpretazione'])[:110]}")
-    print(f"\n  Output in {OUT.relative_to(ROOT)}/ — il contratto AI passa ora dalla review umana (HITL).")
+    print(f"\n  Output in {out}/ — il contratto AI passa ora dalla review umana (HITL).")
 
 
 if __name__ == "__main__":
