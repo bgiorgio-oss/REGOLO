@@ -65,12 +65,18 @@ PIATTAFORMA, su una gara vera già attiva.
   contratti "sottoscritti dal 1° GENNAIO 2026", la comunicazione `challengeconvention`
   dice "dal 19 GENNAIO 2026" → 🤝 da chiarire col cliente PRIMA del conguaglio finale
   (impatta quali contratti maturano punti)
-- 📌 Censimento dati pilota (via MAGI, 2026-06-12): la piattaforma della gara è il
+- 📌 Censimento dati pilota (via MAGI, 2026-06-12): la piattaforma front-end della gara è il
   **Portale Enel Flow** (saldo punti, movimentazioni, premi dei partecipanti);
   `Elaborazione dati incentive 2025.pptx` contiene i criteri di eleggibilità contratti
-  (campi: lds_stato_cliente, flag_sardegna, tipo_servizio, business_consumer,
-  dt_sottoscrizione) → il tracciato sorgente esiste già in azienda
-  → 🤝 chi gestisce Enel Flow e chi prepara oggi i caricamenti punti?
+  (campi: lds_stato_cliente, flag_sardegna, tipo_servizio, business_consumer, dt_sottoscrizione)
+- ✅ **Risposte di Giorgio (2026-06-12)**:
+  1. contratto compilato verificato — fasce kW/G-class OK
+  2. **Enel Flow è del cliente, ma saldi e punti li calcola/gestisce H&A** → conseguenza
+     chiave: lo shadow mode confronta REGOLO con il **metodo attuale di H&A** (i file di
+     caricamento punti), non con una piattaforma-scatola-nera del cliente. Confronto più
+     pulito e sotto il nostro controllo
+  3. **i caricamenti punti li prepara Giorgio** → è insieme: fonte dei file sorgente,
+     validatore dei golden test, e chi scioglie le ambiguità di clausola. Iterazione rapida
 - ⬜ Credenziali Drive PROPRIE di REGOLO (OAuth o service account sul nuovo progetto):
   il recupero one-off non è il pattern di Fase 1
 - 🤝 Candidati trovati via MAGI (2026-06-11) per i regolamenti aggiuntivi:
