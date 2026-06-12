@@ -118,6 +118,21 @@ PIATTAFORMA, su una gara vera già attiva.
   regolamento, inclusi i casi limite; verdi prima di procedere
 
 ### Blocco 1.3 — Motore e riconciliazione (settimane 5–6)
+- ✅ **Backbone Fase 1 implementato** (2026-06-12), codice di produzione in `core/`:
+  - `core/ledger.py` — ledger SQLite append-only REALE: trigger anti-UPDATE/DELETE
+    (verificati), saldi come somma eventi, payload JSON versionato, WAL
+  - `core/motore_gara.py` — motore parametrico guidato dal contratto: punti_a_fasce
+    (range kW + etichetta gas), punti_per_unita, storno (azzeramento), riaccredito,
+    effective dating; zero hardcode, zero LLM
+  - `core/esegui_pilota.py` — orchestratore end-to-end sul contratto pilota REALE +
+    feed sintetico (da sostituire col loader dei dati veri di Giorgio): 233 eventi a
+    ledger, storno/riaccredito verificati (AG-007 pieno dopo riattivazione, AG-011 a 0)
+  - `tests/test_fase1.py` — fasce, feed storno/riaccredito, immutabilità ledger: verde
+  - determinismo verificato (doppio run → ledger identico); golden mockup non regredito
+- 🔴 **Finding da sciogliere col cliente**: le attivazioni DOPO la data di cessazione
+  contano? Oggi il motore le riaccumula; il regolamento esclude gli agenti cessati
+- ⬜ Manca solo il pezzo di Giorgio: **il tracciato reale dei caricamenti** → si scrive
+  il loader (sostituisce `genera_feed_sintetico`) e si gira sui dati veri
 - ✅ **Spike GoRules ZEN Engine** (2026-06-11): contratto SAM2026 transpilato in JDM ed
   eseguito — **392/392 celle identiche al motore, zero divergenze, 0,53 ms/valutazione**
   (`spikes/zen/RISULTATO.md`). Decisione: in Fase 1 L2 = ZEN + nostro layer effective

@@ -6,3 +6,6 @@ mockup/output/
 .env
 # documenti reali dei clienti e relative compilazioni: MAI in git
 gare/
+*.db
+*.db-wal
+*.db-shm
