@@ -56,8 +56,21 @@ PIATTAFORMA, su una gara vera già attiva.
   tasso €/punto inferito e autodenunciato (conf. 0.1), finestra contestazioni inferita,
   e **primo gap di schema reale: meccanica "riaccredito punti" non modellata**
   → ⚠ richiede la review umana di Giorgio (HITL): numeri da validare sul PDF
-- ⬜ Estendere lo schema: meccanica `riaccredito`, fasce/scaglioni come struttura nativa
-  (oggi appiattite in una meccanica per fascia), campo `codice` opzionale
+- ✅ Schema esteso (2026-06-12): tipo `punti_a_fasce` (scaglioni nativi con `da/a/etichetta`)
+  + tipo `riaccredito`. Ricompilazione pilota: fasce kW/G-class come UNA meccanica con
+  scaglioni, riaccredito modellato, escalation ancora più specifiche (segmento SME non
+  definito, classi G non definite, periodo adesione senza date, finestra contestazioni
+  assente) — tutte domande pronte per il cliente
+- 🔴 **DISCREPANZA TRA DOCUMENTI trovata via MAGI** (2026-06-12): il regolamento dice
+  contratti "sottoscritti dal 1° GENNAIO 2026", la comunicazione `challengeconvention`
+  dice "dal 19 GENNAIO 2026" → 🤝 da chiarire col cliente PRIMA del conguaglio finale
+  (impatta quali contratti maturano punti)
+- 📌 Censimento dati pilota (via MAGI, 2026-06-12): la piattaforma della gara è il
+  **Portale Enel Flow** (saldo punti, movimentazioni, premi dei partecipanti);
+  `Elaborazione dati incentive 2025.pptx` contiene i criteri di eleggibilità contratti
+  (campi: lds_stato_cliente, flag_sardegna, tipo_servizio, business_consumer,
+  dt_sottoscrizione) → il tracciato sorgente esiste già in azienda
+  → 🤝 chi gestisce Enel Flow e chi prepara oggi i caricamenti punti?
 - ⬜ Credenziali Drive PROPRIE di REGOLO (OAuth o service account sul nuovo progetto):
   il recupero one-off non è il pattern di Fase 1
 - 🤝 Candidati trovati via MAGI (2026-06-11) per i regolamenti aggiuntivi:

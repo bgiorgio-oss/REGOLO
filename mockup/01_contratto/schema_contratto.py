@@ -26,18 +26,30 @@ class Moltiplicatore(BaseModel):
     fonte_clausola: str
 
 
+class Fascia(BaseModel):
+    """Scaglione di una meccanica a fasce (es. punti per taglia contratto in kW o classe G)."""
+    da: float | None = Field(None, description="estremo inferiore (incluso); null = nessun minimo")
+    a: float | None = Field(None, description="estremo superiore (escluso); null = nessun massimo")
+    etichetta: str | None = Field(None, description="es. '25-50 kW', 'G10-G16'")
+    punti: float
+
+
 class Meccanica(BaseModel):
-    id: str = Field(description="snake_case; per i KPI usare nomi brevi tipo luce_gas, fibra, fotovoltaico, wallbox, clima")
-    tipo: Literal["punti_per_unita", "storno", "bonus_condizionale"]
+    id: str = Field(description="snake_case, breve e parlante")
+    tipo: Literal["punti_per_unita", "punti_a_fasce", "storno", "riaccredito", "bonus_condizionale"]
     fonte_clausola: str
     kpi: str | None = None
-    punti: float | None = Field(None, description="punti per unità o importo del bonus")
+    punti: float | None = Field(None, description="punti per unità o importo del bonus (non usare se a fasce)")
+    fasce: list[Fascia] | None = Field(None, description="per tipo punti_a_fasce: gli scaglioni con relativa "
+                                                         "unità di misura in unita_fascia — UNA meccanica con N "
+                                                         "fasce, non N meccaniche")
+    unita_fascia: str | None = Field(None, description="unità della grandezza che determina la fascia (es. kW, classe G)")
     cap_mensile_punti: int | None = None
     moltiplicatori: list[Moltiplicatore] | None = None
-    condizione: str | None = Field(None, description="per i bonus: condizione leggibile e verificabile")
+    condizione: str | None = Field(None, description="per bonus/riaccredito: condizione leggibile e verificabile")
     ricorrenza: str | None = None
     liquidazione: str | None = None
-    regola: str | None = Field(None, description="per gli storni: regola completa con decorrenza")
+    regola: str | None = Field(None, description="per storni e riaccrediti: regola completa con decorrenza ed eventi che la attivano")
 
 
 class ClusterDef(BaseModel):
